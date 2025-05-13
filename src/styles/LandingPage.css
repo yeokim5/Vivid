@@ -1,0 +1,636 @@
+/* LandingPage.css */
+:root {
+  --primary-color: #5d5fe2;
+  --secondary-color: #9867f0;
+  --accent-color: #ff6b8b;
+  --text-color: #24292e;
+  --light-bg: #f8fafc;
+  --white: #ffffff;
+  --gray: #f0f2f5;
+  --dark-gray: #343a40;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.landing-container {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  color: var(--text-color);
+  max-width: 100%;
+  overflow-x: hidden;
+  background-color: var(--light-bg);
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, #1a1c2e, #2d2f69);
+  background-image: radial-gradient(
+      circle at 20% 30%,
+      rgba(93, 95, 226, 0.4) 0%,
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(152, 103, 240, 0.4) 0%,
+      transparent 30%
+    ),
+    linear-gradient(135deg, #1a1c2e, #2d2f69);
+  color: var(--white);
+  padding: 160px 20px 100px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-content {
+  max-width: 1200px;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.hero-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.1;
+  z-index: 0;
+}
+
+.hero-section::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-color),
+    var(--secondary-color),
+    var(--accent-color)
+  );
+}
+
+.floating-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  filter: blur(40px);
+}
+
+.shape-1 {
+  background: var(--primary-color);
+  width: 300px;
+  height: 300px;
+  top: 20%;
+  left: 10%;
+  animation: floatAnimation 15s infinite ease-in-out;
+}
+
+.shape-2 {
+  background: var(--secondary-color);
+  width: 200px;
+  height: 200px;
+  top: 60%;
+  right: 15%;
+  animation: floatAnimation 12s infinite ease-in-out reverse;
+}
+
+.shape-3 {
+  background: var(--accent-color);
+  width: 150px;
+  height: 150px;
+  bottom: 15%;
+  left: 25%;
+  animation: floatAnimation 18s infinite ease-in-out 2s;
+}
+
+@keyframes floatAnimation {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, -40px) scale(1.1);
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+}
+
+.hero-section h1 {
+  font-size: 5rem;
+  margin-bottom: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff, #d8deff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeInDown 1s ease-out;
+}
+
+.hero-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 50px;
+  font-weight: 500;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 8px 25px rgba(93, 95, 226, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(93, 95, 226, 0.6);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 8px 25px rgba(93, 95, 226, 0.4);
+  }
+}
+
+/* Essay Input Section */
+.essay-input-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+.essay-input-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(93, 95, 226, 0.1),
+    rgba(152, 103, 240, 0.1)
+  );
+  z-index: -1;
+  border-radius: 24px;
+}
+
+.input-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.input-icon {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.essay-input {
+  width: 100%;
+  min-height: 200px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+  margin-bottom: 20px;
+  color: var(--white);
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.essay-input.has-text {
+  border-color: var(--secondary-color);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgba(152, 103, 240, 0.2);
+}
+
+.essay-input:focus {
+  outline: none;
+  border-color: var(--secondary-color);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1),
+    0 0 0 3px rgba(152, 103, 240, 0.3);
+}
+
+.essay-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.word-count {
+  text-align: right;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 25px;
+}
+
+.analyze-btn {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color),
+    var(--accent-color)
+  );
+  background-size: 200% 200%;
+  color: var(--white);
+  border: none;
+  border-radius: 30px;
+  padding: 18px 36px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  animation: gradientShift 8s ease infinite;
+  box-shadow: 0 8px 25px rgba(93, 95, 226, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.btn-icon {
+  margin-right: 10px;
+  font-size: 1.3rem;
+}
+
+.analyze-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(93, 95, 226, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  animation: pulse 2s infinite, gradientShift 8s ease infinite;
+}
+
+.analyze-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  transition: all 0.5s ease;
+  opacity: 0;
+}
+
+.analyze-btn:hover::after {
+  opacity: 1;
+  left: 100%;
+  top: 100%;
+  transition: all 0.8s ease-out;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Popular Essays Section */
+.popular-essays-section {
+  padding: 120px 20px;
+  background-color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+
+.popular-essays-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(
+    90deg,
+    var(--primary-color),
+    var(--secondary-color),
+    var(--accent-color)
+  );
+  opacity: 0.8;
+}
+
+.popular-essays-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(
+      circle at 10% 90%,
+      rgba(93, 95, 226, 0.03) 0%,
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(152, 103, 240, 0.03) 0%,
+      transparent 30%
+    );
+  z-index: 0;
+}
+
+.popular-essays-section h2 {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--text-color);
+  font-weight: 800;
+  position: relative;
+  z-index: 1;
+}
+
+.popular-essays-section h2::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  margin: 20px auto 50px;
+  border-radius: 2px;
+}
+
+.essays-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.essay-card {
+  background-color: var(--white);
+  border-radius: 20px;
+  padding: 35px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: all 0.4s ease;
+  border: 1px solid var(--gray);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.essay-tag {
+  display: inline-block;
+  background: linear-gradient(
+    135deg,
+    rgba(93, 95, 226, 0.1),
+    rgba(152, 103, 240, 0.1)
+  );
+  color: var(--primary-color);
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  border: 1px solid rgba(93, 95, 226, 0.2);
+}
+
+.essay-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  transition: height 0.4s ease;
+  z-index: -1;
+}
+
+.essay-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 1px 5px rgba(0, 0, 0, 0.03);
+}
+
+.essay-card:hover::before {
+  height: 100%;
+}
+
+.essay-card h3 {
+  font-size: 1.6rem;
+  margin-bottom: 15px;
+  color: var(--text-color);
+  font-weight: 700;
+  transition: color 0.3s ease;
+}
+
+.essay-card:hover h3 {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.essay-excerpt {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 25px;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.essay-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #6c757d;
+  font-size: 0.95rem;
+  padding-top: 15px;
+  border-top: 1px solid var(--gray);
+}
+
+.essay-author {
+  font-weight: 600;
+}
+
+.essay-views {
+  display: flex;
+  align-items: center;
+}
+
+.essay-views::before {
+  content: "👁️";
+  margin-right: 5px;
+  font-size: 1rem;
+}
+
+.explore-more {
+  text-align: center;
+  margin-top: 60px;
+}
+
+.explore-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(93, 95, 226, 0.1),
+    rgba(152, 103, 240, 0.1)
+  );
+  color: var(--primary-color);
+  border: 1px solid rgba(93, 95, 226, 0.3);
+  border-radius: 30px;
+  padding: 14px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.explore-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(93, 95, 226, 0.2),
+    rgba(152, 103, 240, 0.2)
+  );
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 120px 20px 80px;
+    min-height: auto;
+  }
+
+  .hero-section h1 {
+    font-size: 3.5rem;
+  }
+
+  .hero-section h2 {
+    font-size: 1.4rem;
+    margin-bottom: 40px;
+  }
+
+  .essay-input-container {
+    padding: 30px;
+    border-radius: 20px;
+  }
+
+  .essay-input {
+    min-height: 180px;
+  }
+
+  .analyze-btn {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+  }
+
+  .popular-essays-section {
+    padding: 80px 20px;
+  }
+
+  .popular-essays-section h2 {
+    font-size: 2.2rem;
+  }
+
+  .popular-essays-section h2::after {
+    margin: 15px auto 40px;
+  }
+
+  .essays-grid {
+    gap: 30px;
+  }
+
+  .essay-card {
+    padding: 25px;
+  }
+
+  .explore-more {
+    margin-top: 40px;
+  }
+}
