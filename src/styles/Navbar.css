@@ -142,6 +142,49 @@
   background-color: var(--white);
 }
 
+/* Google Sign-in Button Styles */
+.nav-btn-google {
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  padding: 0;
+  height: 40px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.nav-btn-google:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.nav-btn-google:active {
+  background-color: #f1f3f4;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.google-btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  height: 100%;
+}
+
+.google-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.nav-btn-google span {
+  color: #3c4043;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 /* Mobile view */
 @media screen and (max-width: 960px) {
   .menu-icon {
@@ -210,5 +253,15 @@
   .menu-icon.active span:nth-child(3) {
     transform: translateY(-9px) rotate(-45deg);
     background-color: var(--white);
+  }
+
+  .nav-btn-google {
+    width: 80%;
+    margin: 5px auto;
+    background-color: #ffffff;
+  }
+
+  .nav-btn-google span {
+    color: #3c4043;
   }
 }
