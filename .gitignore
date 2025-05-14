@@ -47,5 +47,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-src/utils/firebase.ts

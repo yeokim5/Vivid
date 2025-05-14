@@ -4,13 +4,13 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAC90-nlgtcnRXw7PARKkY2RBovPwsYSbE",
-  authDomain: "vivid-6d6cd.firebaseapp.com",
-  projectId: "vivid-6d6cd",
-  storageBucket: "vivid-6d6cd.firebasestorage.app",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: "1:463862134798:web:b005e3598d61bd401b245f",
-  measurementId: "G-GDMBPWW5BM",
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 // Initialize Firebase
