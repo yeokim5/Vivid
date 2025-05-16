@@ -1,0 +1,40 @@
+Essay content
+Title: "One more."
+Content: "Do you think I can have one more kiss? I'll find closure on your lips, and then I'll go. Maybe also one more breakfast, one more lunch, and one more dinner. I'll be full and happy and we can part. But in between meals, maybe we can lie in bed one more time. One more prolonged moment where time suspends indefinitely as I rest my head on your chest. My hope is if we add up the 'one mores,' they will equal a lifetime and I'll never have to get to the part where I let you go. But that's not real, is it? There are no more 'one mores.' I met you when everything was new and exciting, and the possibilities of the world seemed endless. And they still are... for you, for me, but not for us. Somewhere between then and now, here and there, I guess we didn't just grow apart, we grew up. When something breaks, if the pieces are large enough, you can fix it. Unfortunately, sometimes things don't break, they shatter. But when you let the light in, shattered glass will glitter. And in those moments when the pieces of what we were catch the sun, I'll remember just how beautiful it was. Just how beautiful it'll always be. Because it was us. And we were magic. Forever.""
+
+**Prompt:**
+
+> Create a single-page HTML scrollytelling.
+you can use these technologies apropriately.
+SplitText
+ScrollTrigger
+ScrollSmooother
+GSAP Core
+ObserverFlip
+
+reference page:
+https://techredux.co/
+https://www.nite-riot.com/
+https://www.dolsten.com/
+https://www.childless.ch/
+https://sophiezwartkruis.com/
+https://berserk-heart-of-darkness.vercel.app/
+https://quechua-lookbook.com/ss25/
+
+
+
+Work Flow:
+1. User click "make it vivid"
+2. Extract 10 keywords from the essay.
+3. Based on the keywords, fetch 3 images from lumni ai. That user can Choose.
+4. User choose general Design Theme: Color, Font, etc.
+4. Based on current imformation, it creates a prompt.
+5. It Outlines
+6. And generate the code
+7. If seperate file use script to combine
+
+
+design improvements:
+- 3d object just spiinign in the middle of the screen., it should be more diverse. coming from left, right etc.
+- the essay words are to blend, i want to essay text to be more visual.
+like highlting the word, etc.

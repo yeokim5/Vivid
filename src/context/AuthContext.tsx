@@ -27,7 +27,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -41,12 +41,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (firebaseUser) {
         try {
           // Send user data to backend
-          const response = await axios.post(`${API_URL}/auth/firebase-login`, {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
-          });
+          const response = await axios.post(
+            `${API_URL}/api/auth/firebase-login`,
+            {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              name: firebaseUser.displayName,
+              photoURL: firebaseUser.photoURL,
+            }
+          );
 
           // Save JWT token from our backend
           localStorage.setItem("auth_token", response.data.token);
@@ -120,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(null);
 
       // Also notify backend about logout
-      await axios.post(`${API_URL}/auth/logout`);
+      await axios.post(`${API_URL}/api/auth/logout`);
     } catch (err) {
       console.error("Error during logout:", err);
       // Still remove token and user data on client side
