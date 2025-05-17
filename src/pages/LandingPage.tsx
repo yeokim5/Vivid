@@ -33,6 +33,7 @@ const popularEssays = [
 ];
 
 const LandingPage: React.FC = () => {
+  const [essayTitle, setEssayTitle] = useState("");
   const [essayText, setEssayText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const navigate = useNavigate();
@@ -47,7 +48,22 @@ const LandingPage: React.FC = () => {
   }, []);
 
   const handleButtonClick = () => {
-    navigate("/login");
+    // Check if there's content to process
+    if (essayText.trim()) {
+      // Store the essay content and title in localStorage for access after login
+      localStorage.setItem("pendingEssayTitle", essayTitle);
+      localStorage.setItem("pendingEssayContent", essayText);
+
+      // Navigate to login page
+      navigate("/login");
+    } else {
+      // You could add validation UI feedback here
+      alert("Please enter some essay content before proceeding.");
+    }
+  };
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEssayTitle(e.target.value);
   };
 
   const handleEssayChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -75,6 +91,13 @@ const LandingPage: React.FC = () => {
             <div className="input-label">
               <span>Start with your idea or essay</span>
             </div>
+            <input
+              type="text"
+              className="essay-title-input"
+              placeholder="Enter essay title..."
+              value={essayTitle}
+              onChange={handleTitleChange}
+            />
             <textarea
               className={`essay-input ${isTyping ? "has-text" : ""}`}
               placeholder="Paste your essay here (limited to 1000 words)..."
