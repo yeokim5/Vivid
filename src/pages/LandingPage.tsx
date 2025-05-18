@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import VividGenerator from "../components/VividGenerator";
 import "../styles/LandingPage.css";
 
 // Placeholder for popular essays data
@@ -47,21 +48,6 @@ const LandingPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleButtonClick = () => {
-    // Check if there's content to process
-    if (essayText.trim()) {
-      // Store the essay content and title in localStorage for access after login
-      localStorage.setItem("pendingEssayTitle", essayTitle);
-      localStorage.setItem("pendingEssayContent", essayText);
-
-      // Navigate to login page
-      navigate("/login");
-    } else {
-      // You could add validation UI feedback here
-      alert("Please enter some essay content before proceeding.");
-    }
-  };
-
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEssayTitle(e.target.value);
   };
@@ -105,10 +91,8 @@ const LandingPage: React.FC = () => {
               onChange={handleEssayChange}
             />
             <div className="word-count">{wordCount}/1000 words</div>
-            <button className="analyze-btn" onClick={handleButtonClick}>
-              <span className="btn-icon">✨</span>
-              Make It Vivid
-            </button>
+
+            <VividGenerator title={essayTitle} content={essayText} />
           </div>
         </div>
 
