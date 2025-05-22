@@ -11,19 +11,17 @@ interface Section {
 }
 
 interface ImageSelectionFlowProps {
-  isOpen: boolean;
-  onClose: () => void;
   sections: Section[];
-  title: string;
-  onComplete: (selectedImages: Record<string, string>) => void;
+  backgroundSuggestions: Record<string, string>;
+  onImagesSelected: (selectedImages: Record<string, string>) => void;
+  onClose: () => void;
 }
 
 const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
-  isOpen,
-  onClose,
   sections,
-  title,
-  onComplete,
+  backgroundSuggestions,
+  onImagesSelected,
+  onClose,
 }) => {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
   const [selectedImages, setSelectedImages] = useState<Record<string, string>>(
@@ -44,7 +42,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
 
   // Load current section and preload next section when component mounts or section changes
   useEffect(() => {
-    if (isOpen && sections.length > 0) {
+    if (sections.length > 0) {
       // Load current section if not already loaded
       if (currentSection && !allSectionImages[currentSection.section_number]) {
         loadImagesForSection(currentSection);
@@ -59,7 +57,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
         }
       }
     }
-  }, [isOpen, currentSectionIndex, sections]);
+  }, [currentSectionIndex, sections]);
 
   const loadImagesForSection = async (section: Section) => {
     if (!section?.background_image || loadingSections[section.section_number]) {
@@ -174,7 +172,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
         ...selectedImages,
         [sectionKey]: imageUrl,
       };
-      onComplete(updatedSelectedImages);
+      onImagesSelected(updatedSelectedImages);
       onClose();
     }
   };
@@ -183,7 +181,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     if (currentSectionIndex < sections.length - 1) {
       setCurrentSectionIndex(currentSectionIndex + 1);
     } else {
-      onComplete(selectedImages);
+      onImagesSelected(selectedImages);
       onClose();
     }
   };
@@ -202,9 +200,9 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
 
   return (
     <FullScreenModal
-      isOpen={isOpen}
+      isOpen={sections.length > 0}
       onClose={onClose}
-      title={`Select Images for "${title}"`}
+      title={`Select Images`}
     >
       <div className="image-selection-flow">
         <div className="progress-bar-container">

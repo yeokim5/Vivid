@@ -48,6 +48,8 @@ const LandingPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEssayTitle(e.target.value);
   };

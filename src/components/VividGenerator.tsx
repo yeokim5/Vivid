@@ -22,9 +22,8 @@ interface SectionData {
 interface EssayJsonResponse {
   success: boolean;
   message: string;
-  filename: string;
-  filePath: string;
-  essayJson: Record<string, any>;
+  essayId: string;
+  viewUrl: string;
 }
 
 const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
@@ -38,11 +37,8 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
     Record<string, string>
   >({});
   const [showImageSelectionFlow, setShowImageSelectionFlow] = useState(false);
-  const [jsonOutput, setJsonOutput] = useState<Record<string, any> | null>(
-    null
-  );
-  const [jsonFilePath, setJsonFilePath] = useState<string | null>(null);
-  const [showJsonContent, setShowJsonContent] = useState(false);
+  const [essayCreated, setEssayCreated] = useState(false);
+  const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -156,17 +152,31 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
       setResult(updatedResult);
 
       try {
-        // Generate the JSON file with the essay content and selected images
+        // Get the auth token from localStorage
+        const authToken = localStorage.getItem("auth_token");
+        if (!authToken) {
+          throw new Error("Not authenticated. Please log in to create an essay.");
+        }
+
+        // Create the essay with HTML content
         const response = await fetch(
-          "http://localhost:5000/api/sections/generate-json",
+          "http://localhost:5000/api/essays/html",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${authToken}`
             },
             body: JSON.stringify({
               title: updatedResult.title,
-              sections: updatedResult.sections,
+              content: {
+                title: updatedResult.title,
+                sections: updatedResult.sections.map(section => ({
+                  section_number: section.section_number,
+                  content: section.content,
+                  selected_image_url: section.selected_image_url || section.background_image
+                }))
+              }
             }),
           }
         );
@@ -182,18 +192,16 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
         const data: EssayJsonResponse = await response.json();
 
         if (data.success) {
-          setJsonOutput(data.essayJson);
-          setJsonFilePath(data.filePath);
-          console.log("Essay JSON generated:", data.essayJson);
-          console.log("JSON file saved at:", data.filePath);
+          setEssayCreated(true);
+          setEssayViewUrl(`/essays/${data.essayId}`);
         } else {
-          throw new Error(data.message || "Failed to generate JSON file");
+          throw new Error(data.message || "Failed to create essay");
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : "Failed to generate JSON output"
+          err instanceof Error ? err.message : "Failed to create essay"
         );
-        console.error("Error generating JSON:", err);
+        console.error("Error creating essay:", err);
       }
     }
 
@@ -202,10 +210,6 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
 
   const handleCloseImageSelectionFlow = () => {
     setShowImageSelectionFlow(false);
-  };
-
-  const toggleJsonContent = () => {
-    setShowJsonContent(!showJsonContent);
   };
 
   return (
@@ -221,45 +225,22 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
 
       {error && <div className="error-message">{error}</div>}
 
-      {jsonOutput && (
-        <div className="json-output">
-          <h3>Essay JSON Generated</h3>
-          <p>Your essay has been successfully processed and saved as JSON.</p>
-          {jsonFilePath && (
-            <div>
-              <p>
-                File path: <code>{jsonFilePath}</code>
-              </p>
-              <div className="json-actions">
-                <a
-                  href={`http://localhost:5000${jsonFilePath}`}
-                  download
-                  className="download-btn"
-                >
-                  Download JSON File
-                </a>
-                <button className="view-json-btn" onClick={toggleJsonContent}>
-                  {showJsonContent ? "Hide JSON Content" : "View JSON Content"}
-                </button>
-              </div>
-
-              {showJsonContent && (
-                <div className="json-preview">
-                  <pre>{JSON.stringify(jsonOutput, null, 2)}</pre>
-                </div>
-              )}
-            </div>
-          )}
+      {essayCreated && essayViewUrl && (
+        <div className="essay-created">
+          <h3>Essay Created Successfully!</h3>
+          <p>Your essay has been transformed into a beautiful visual experience.</p>
+          <a href={essayViewUrl} target="_blank" rel="noopener noreferrer" className="view-essay-btn">
+            View Your Essay
+          </a>
         </div>
       )}
 
-      {showImageSelectionFlow && result && (
+      {showImageSelectionFlow && (
         <ImageSelectionFlow
-          isOpen={showImageSelectionFlow}
+          sections={result?.sections || []}
+          backgroundSuggestions={backgroundSuggestions}
+          onImagesSelected={handleBackgroundImagesSelected}
           onClose={handleCloseImageSelectionFlow}
-          sections={result.sections}
-          title={result.title}
-          onComplete={handleBackgroundImagesSelected}
         />
       )}
     </div>

@@ -1,15 +1,20 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import AuthCallback from "./pages/AuthCallback";
-import Profile from "./pages/Profile";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import LandingPage from "./pages/LandingPage";
+import About from "./pages/About";
+import Profile from "./pages/Profile";
+import AuthCallback from "./pages/AuthCallback";
+import NotFound from "./pages/NotFound";
+import ViewEssay from "./pages/ViewEssay";
 
 // Placeholder components - would be imported from actual components
-const About: React.FC = () => <div>About Page</div>;
-const NotFound: React.FC = () => <div>404 - Page Not Found</div>;
+const AboutPage: React.FC = () => <div>About Page</div>;
 
 const App: React.FC = () => {
+  const location = useLocation();
+  const isEssayView = location.pathname.startsWith('/essays/');
+
   return (
     <AuthProvider>
       <div className="App">
@@ -18,11 +23,14 @@ const App: React.FC = () => {
           <Route path="/about" element={<About />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/essays/:id" element={<ViewEssay />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <footer>
-          <p>&copy; {new Date().getFullYear()} MagicEssay</p>
-        </footer>
+        {!isEssayView && (
+          <footer>
+            <p>&copy; {new Date().getFullYear()} MagicEssay</p>
+          </footer>
+        )}
       </div>
     </AuthProvider>
   );
