@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import FullScreenModal from "./FullScreenModal";
-import ImageCarousel from "./ImageCarousel";
+import ImageSelectionModal from "./ImageSelectionModal";
 import "../styles/ImageSelectionFlow.css";
 
 interface Section {
@@ -24,48 +23,47 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   onClose,
 }) => {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(0);
-  const [selectedImages, setSelectedImages] = useState<Record<string, string>>(
-    {}
-  );
-  const [allSectionImages, setAllSectionImages] = useState<
-    Record<number, string[]>
-  >({});
-  const [loadingSections, setLoadingSections] = useState<
-    Record<number, boolean>
-  >({});
+  const [selectedImages, setSelectedImages] = useState<Record<string, string>>({});
+  const [allSectionImages, setAllSectionImages] = useState<Record<number, string[]>>({});
+  const [loadingSections, setLoadingSections] = useState<Record<number, boolean>>({});
   const [error, setError] = useState<string | null>(null);
-  const [loadingSectionRetry, setLoadingSectionRetry] =
-    useState<boolean>(false);
+  const [loadingSectionRetry, setLoadingSectionRetry] = useState<boolean>(false);
+  const [queuedSections, setQueuedSections] = useState<number[]>([]);
 
   const currentSection = sections[currentSectionIndex];
   const sectionKey = `section_${currentSection?.section_number}_background_image`;
 
-  // Load current section and preload next section when component mounts or section changes
+  // Initialize queue with all section numbers
   useEffect(() => {
     if (sections.length > 0) {
-      // Load current section if not already loaded
-      if (currentSection && !allSectionImages[currentSection.section_number]) {
-        loadImagesForSection(currentSection);
-      }
-
-      // Preload next section if it exists
-      const nextSectionIndex = currentSectionIndex + 1;
-      if (nextSectionIndex < sections.length) {
-        const nextSection = sections[nextSectionIndex];
-        if (!allSectionImages[nextSection.section_number]) {
-          loadImagesForSection(nextSection);
-        }
-      }
+      const sectionNumbers = sections.map(section => section.section_number);
+      setQueuedSections(sectionNumbers);
     }
-  }, [currentSectionIndex, sections]);
+  }, [sections]);
+
+  // Process the queue of sections
+  useEffect(() => {
+    const processNextSection = async () => {
+      if (queuedSections.length === 0) return;
+
+      const nextSectionNumber = queuedSections[0];
+      const nextSection = sections.find(s => s.section_number === nextSectionNumber);
+      
+      if (nextSection && !allSectionImages[nextSectionNumber] && !loadingSections[nextSectionNumber]) {
+        await loadImagesForSection(nextSection);
+        setQueuedSections(prev => prev.slice(1));
+      }
+    };
+
+    processNextSection();
+  }, [queuedSections, sections, allSectionImages, loadingSections]);
 
   const loadImagesForSection = async (section: Section) => {
     if (!section?.background_image || loadingSections[section.section_number]) {
       return;
     }
 
-    // Mark this section as loading
-    setLoadingSections((prev) => ({
+    setLoadingSections(prev => ({
       ...prev,
       [section.section_number]: true,
     }));
@@ -79,42 +77,35 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
         body: JSON.stringify({
           prompt: section.background_image,
           maxImages: 10,
+          sectionId: section.section_number,
         }),
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch images for section ${section.section_number}`
-        );
+        throw new Error(`Failed to fetch images for section ${section.section_number}`);
       }
 
       const data = await response.json();
 
       if (data.success && data.urls && data.urls.length > 0) {
-        setAllSectionImages((prev) => ({
+        setAllSectionImages(prev => ({
           ...prev,
           [section.section_number]: data.urls,
         }));
       } else {
-        // Set empty array if no images were found
-        setAllSectionImages((prev) => ({
+        setAllSectionImages(prev => ({
           ...prev,
           [section.section_number]: [],
         }));
       }
     } catch (err) {
-      console.error(
-        `Error loading images for section ${section.section_number}:`,
-        err
-      );
-      // Set empty array on error
-      setAllSectionImages((prev) => ({
+      console.error(`Error loading images for section ${section.section_number}:`, err);
+      setAllSectionImages(prev => ({
         ...prev,
         [section.section_number]: [],
       }));
     } finally {
-      // Mark this section as no longer loading
-      setLoadingSections((prev) => ({
+      setLoadingSections(prev => ({
         ...prev,
         [section.section_number]: false,
       }));
@@ -145,7 +136,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
       const data = await response.json();
 
       if (data.success && data.urls && data.urls.length > 0) {
-        setAllSectionImages((prev) => ({
+        setAllSectionImages(prev => ({
           ...prev,
           [currentSection.section_number]: data.urls,
         }));
@@ -158,16 +149,14 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   };
 
   const handleSelectImage = (imageUrl: string) => {
-    setSelectedImages((prev) => ({
+    setSelectedImages(prev => ({
       ...prev,
       [sectionKey]: imageUrl,
     }));
 
-    // Move to next section or complete
     if (currentSectionIndex < sections.length - 1) {
       setCurrentSectionIndex(currentSectionIndex + 1);
     } else {
-      // We're done with all sections
       const updatedSelectedImages = {
         ...selectedImages,
         [sectionKey]: imageUrl,
@@ -199,54 +188,14 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     currentSection && loadingSections[currentSection.section_number];
 
   return (
-    <FullScreenModal
+    <ImageSelectionModal
       isOpen={sections.length > 0}
       onClose={onClose}
-      title={`Select Images`}
-    >
-      <div className="image-selection-flow">
-        <div className="progress-bar-container">
-          <div className="progress-bar" style={{ width: `${progress}%` }}></div>
-          <div className="progress-text">
-            Section {currentSectionIndex + 1} of {sections.length}
-          </div>
-        </div>
-
-        <div className="section-content">
-          <h3>Section {currentSection?.section_number}</h3>
-          <p>{currentSection?.content}</p>
-        </div>
-
-        {error ? (
-          <div className="error">{error}</div>
-        ) : isCurrentSectionLoading || loadingSectionRetry ? (
-          <div className="loading">Loading images...</div>
-        ) : (
-          <ImageCarousel
-            images={currentImages}
-            onSelectImage={handleSelectImage}
-            prompt={currentSection?.background_image || ""}
-            onRetryLoad={handleRetryLoadImagesForCurrentSection}
-          />
-        )}
-
-        <div className="navigation-buttons">
-          <button className="skip-button" onClick={handleSkipSection}>
-            Skip This Section
-          </button>
-
-          {currentSectionIndex === sections.length - 1 && (
-            <div className="completion-message">
-              <p>
-                After selecting an image for this section (or skipping), your
-                essay will be exported as a JSON file with the content and
-                selected images.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </FullScreenModal>
+      section={currentSection}
+      images={currentImages}
+      onSelectImage={handleSelectImage}
+      onRetryLoad={handleRetryLoadImagesForCurrentSection}
+    />
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -43,6 +43,7 @@ const ViewEssay: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEssay = async () => {
@@ -76,8 +77,52 @@ const ViewEssay: React.FC = () => {
           const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
           if (iframeDoc) {
             iframeDoc.open();
-            iframeDoc.write(content);
+            // Add CSS to handle scrolling properly
+            iframeDoc.write(`
+              <style>
+                html, body {
+                  margin: 0;
+                  padding: 0;
+                  height: 100%;
+                  width: 100%;
+                }
+                .smooth-wrapper {
+                  height: 100%;
+                  overflow-y: auto;
+                  overflow-x: hidden;
+                  scroll-behavior: smooth;
+                }
+                .smooth-content {
+                  height: 100%;
+                }
+                section {
+                  min-height: 100vh;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                }
+                /* Hide scrollbar for Chrome, Safari and Opera */
+                .smooth-wrapper::-webkit-scrollbar {
+                  display: none;
+                }
+                /* Hide scrollbar for IE, Edge and Firefox */
+                .smooth-wrapper {
+                  -ms-overflow-style: none;  /* IE and Edge */
+                  scrollbar-width: none;  /* Firefox */
+                }
+              </style>
+              ${content}
+            `);
             iframeDoc.close();
+
+            // Add event listener for the "Make Your Own Essay" link
+            const creditsLink = iframeDoc.querySelector('.credits');
+            if (creditsLink) {
+              creditsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigate('/');
+              });
+            }
           }
         }
       } catch (err) {
@@ -91,7 +136,7 @@ const ViewEssay: React.FC = () => {
     if (id) {
       fetchEssay();
     }
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -127,12 +172,16 @@ const ViewEssay: React.FC = () => {
   }
 
   return (
-    <div style={{ backgroundColor: '#0a0a0a', minHeight: '100vh' }}>
+    <div style={{ 
+      backgroundColor: '#0a0a0a', 
+      height: '100vh',
+      overflow: 'hidden'
+    }}>
       <iframe
         ref={iframeRef}
         style={{
           width: '100%',
-          height: '100vh',
+          height: '100%',
           border: 'none',
           backgroundColor: '#0a0a0a'
         }}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../styles/VividGenerator.css";
 import ImageSelectionFlow from "./ImageSelectionFlow";
+import SuccessModal from "./SuccessModal";
 
 interface VividGeneratorProps {
   title: string;
@@ -39,6 +40,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
   const [showImageSelectionFlow, setShowImageSelectionFlow] = useState(false);
   const [essayCreated, setEssayCreated] = useState(false);
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -194,6 +196,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
         if (data.success) {
           setEssayCreated(true);
           setEssayViewUrl(`/essays/${data.essayId}`);
+          setShowSuccessModal(true);
         } else {
           throw new Error(data.message || "Failed to create essay");
         }
@@ -212,6 +215,10 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
     setShowImageSelectionFlow(false);
   };
 
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+  };
+
   return (
     <div className="vivid-generator">
       <button
@@ -225,22 +232,20 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
 
       {error && <div className="error-message">{error}</div>}
 
-      {essayCreated && essayViewUrl && (
-        <div className="essay-created">
-          <h3>Essay Created Successfully!</h3>
-          <p>Your essay has been transformed into a beautiful visual experience.</p>
-          <a href={essayViewUrl} target="_blank" rel="noopener noreferrer" className="view-essay-btn">
-            View Your Essay
-          </a>
-        </div>
-      )}
-
       {showImageSelectionFlow && (
         <ImageSelectionFlow
           sections={result?.sections || []}
           backgroundSuggestions={backgroundSuggestions}
           onImagesSelected={handleBackgroundImagesSelected}
           onClose={handleCloseImageSelectionFlow}
+        />
+      )}
+
+      {essayCreated && essayViewUrl && (
+        <SuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleCloseSuccessModal}
+          essayViewUrl={essayViewUrl}
         />
       )}
     </div>

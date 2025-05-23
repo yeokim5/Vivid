@@ -1,4 +1,5 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
+import ModalPortal from "./ModalPortal";
 import "../styles/FullScreenModal.css";
 
 interface FullScreenModalProps {
@@ -14,18 +15,31 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
   children,
   title,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="full-screen-modal">
-      <div className="modal-header">
-        {title && <h2>{title}</h2>}
-        <button className="close-button" onClick={onClose}>
-          ×
-        </button>
+    <ModalPortal>
+      <div className="full-screen-modal">
+        <div className="modal-header">
+          {title && <h2>{title}</h2>}
+          <button className="close-button" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="modal-content">{children}</div>
       </div>
-      <div className="modal-content">{children}</div>
-    </div>
+    </ModalPortal>
   );
 };
 

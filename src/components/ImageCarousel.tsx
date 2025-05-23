@@ -49,7 +49,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   if (images.length === 0 || validImagesCount === 0) {
     return (
       <div className="no-images">
-        <p>No images available for this section</p>
+        <p>Image Loading..</p>
         {onRetryLoad && (
           <button className="retry-button" onClick={onRetryLoad}>
             Retry Loading Images
