@@ -203,7 +203,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
 
         if (data.success) {
           setEssayCreated(true);
-          setEssayViewUrl(`/essays/${data.essayId}`);
+          setEssayViewUrl(`/essay/${data.essayId}`);
           setShowSuccessModal(true);
         } else {
           throw new Error(data.message || "Failed to create essay");

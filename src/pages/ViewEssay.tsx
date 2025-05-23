@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import "../styles/ViewEssay.css";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -48,27 +49,29 @@ const ViewEssay: React.FC = () => {
   useEffect(() => {
     const fetchEssay = async () => {
       try {
-        console.log("API_URL:", API_URL);
-        console.log("id:", id);
-        const url = `${API_URL}/essays/${id}/render`;
-        console.log("Fetching from URL:", url);
-        
-        const response = await fetch(url);
-        console.log("Response status:", response.status);
-        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
-        
+        // Check if this user has already viewed this essay
+        const viewedEssays = JSON.parse(localStorage.getItem('viewedEssays') || '{}');
+        const hasViewed = viewedEssays[id || ''];
+
+        // Fetch the essay content
+        const response = await fetch(`${API_URL}/essays/${id}/render`);
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error response:", errorText);
-          throw new Error(`Failed to fetch essay: ${response.status} ${errorText}`);
+          throw new Error("Failed to fetch essay");
         }
-        
-        const content = await response.text();
-        console.log("Received content length:", content.length);
-        console.log("Content type:", response.headers.get("content-type"));
-        
-        if (!content) {
-          throw new Error("Received empty content from server");
+        const html = await response.text();
+
+        // If this is the first view, increment the view count
+        if (!hasViewed && id) {
+          try {
+            await fetch(`${API_URL}/essays/${id}/view`, {
+              method: 'POST'
+            });
+            // Mark this essay as viewed by this user
+            viewedEssays[id] = true;
+            localStorage.setItem('viewedEssays', JSON.stringify(viewedEssays));
+          } catch (error) {
+            console.error("Failed to increment view count:", error);
+          }
         }
 
         // Write the content to the iframe
@@ -85,6 +88,8 @@ const ViewEssay: React.FC = () => {
                   padding: 0;
                   height: 100%;
                   width: 100%;
+                  background-color: #0a0a0a;
+                  color: #f8f9fa;
                 }
                 .smooth-wrapper {
                   height: 100%;
@@ -111,7 +116,7 @@ const ViewEssay: React.FC = () => {
                   scrollbar-width: none;  /* Firefox */
                 }
               </style>
-              ${content}
+              ${html}
             `);
             iframeDoc.close();
 
@@ -125,9 +130,9 @@ const ViewEssay: React.FC = () => {
             }
           }
         }
-      } catch (err) {
-        console.error("Error fetching essay:", err);
-        setError(err instanceof Error ? err.message : "Failed to load essay");
+      } catch (error) {
+        console.error("Error:", error);
+        setError("Failed to load essay");
       } finally {
         setLoading(false);
       }
@@ -140,50 +145,34 @@ const ViewEssay: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="loading" style={{ 
-        backgroundColor: '#0a0a0a',
-        color: '#f8f9fa',
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <p>Loading essay...</p>
+      <div className="view-essay-container">
+        <div className="loading">Loading essay...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="error" style={{ 
-        backgroundColor: '#0a0a0a',
-        color: '#f8f9fa',
-        minHeight: '100vh',
-        padding: '20px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <p>Error: {error}</p>
-        <p>Please try refreshing the page or contact support if the issue persists.</p>
+      <div className="view-essay-container">
+        <div className="error">{error}</div>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      backgroundColor: '#0a0a0a', 
+    <div className="view-essay-container" style={{
+      overflow: 'hidden',
       height: '100vh',
-      overflow: 'hidden'
+      width: '100%'
     }}>
       <iframe
         ref={iframeRef}
         style={{
           width: '100%',
-          height: '100%',
+          height: '100vh',
           border: 'none',
-          backgroundColor: '#0a0a0a'
+          backgroundColor: '#0a0a0a',
+          overflow: 'hidden'
         }}
         title="Essay Content"
       />

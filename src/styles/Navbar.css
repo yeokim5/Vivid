@@ -11,7 +11,7 @@
 }
 
 .navbar {
-  background-color: transparent;
+  background-color: rgba(26, 28, 46, 0.95);
   height: 70px;
   display: flex;
   justify-content: center;
@@ -22,12 +22,13 @@
   right: 0;
   z-index: 999;
   transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
 }
 
 .navbar.scrolled {
-  background-color: rgba(26, 28, 46, 0.95);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+  background-color: rgba(26, 28, 46, 0.98);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
 }
 
 .navbar-container {

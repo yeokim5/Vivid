@@ -54,20 +54,11 @@ const Navbar: React.FC = () => {
         <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
           <li className="nav-item">
             <Link
-              to="/"
+              to="/essays"
               className="nav-link"
               onClick={() => setMenuOpen(false)}
             >
-              Home
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link
-              to="/popular-essays"
-              className="nav-link"
-              onClick={() => setMenuOpen(false)}
-            >
-              Popular Essays
+              Essays
             </Link>
           </li>
           <li className="nav-item">
