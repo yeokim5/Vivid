@@ -17,6 +17,8 @@ interface Section {
 
 interface SectionData {
   title: string;
+  subtitle: string;
+  header_background_image: string;
   sections: Section[];
 }
 
@@ -101,7 +103,9 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
 
       if (data.success && data.data) {
         // Extract background image suggestions from the sections
-        const suggestions: Record<string, string> = {};
+        const suggestions: Record<string, string> = {
+          header_background_image: data.data.header_background_image
+        };
         data.data.sections.forEach((section: Section, index: number) => {
           const sectionNumber = index + 1;
           suggestions[`section_${sectionNumber}_background_image`] =
@@ -137,7 +141,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
         const sectionKey = `section_${section.section_number}_background_image`;
         const selectedImageUrl = selectedImages[sectionKey];
 
-        if (selectedImageUrl) {
+        if (selectedImageUrl && selectedImageUrl.startsWith('http')) {
           return {
             ...section,
             selected_image_url: selectedImageUrl,
@@ -171,12 +175,16 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
             },
             body: JSON.stringify({
               title: updatedResult.title,
+              subtitle: updatedResult.subtitle,
+              header_background_image: selectedImages.header_background_image?.startsWith('http') ? selectedImages.header_background_image : '',
               content: {
                 title: updatedResult.title,
+                subtitle: updatedResult.subtitle,
+                header_background_image: selectedImages.header_background_image?.startsWith('http') ? selectedImages.header_background_image : '',
                 sections: updatedResult.sections.map(section => ({
                   section_number: section.section_number,
                   content: section.content,
-                  selected_image_url: section.selected_image_url || section.background_image
+                  selected_image_url: section.selected_image_url?.startsWith('http') ? section.selected_image_url : ''
                 }))
               }
             }),

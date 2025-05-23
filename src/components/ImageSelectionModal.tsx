@@ -28,10 +28,14 @@ const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
   onRetryLoad,
 }) => {
   return (
-    <FullScreenModal isOpen={isOpen} onClose={onClose} title={`Select Image for Section ${section.section_number}`}>
+    <FullScreenModal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={section.section_number === 0 ? "Select Header Background Image" : `Select Image for Section ${section.section_number}`}
+    >
       <div className="image-selection-modal">
         <div className="section-content">
-          <h3>Section {section.section_number}</h3>
+          <h3>{section.section_number === 0 ? "Title Background" : `Section ${section.section_number}`}</h3>
           <p>{section.content}</p>
         </div>
 
@@ -44,7 +48,6 @@ const ImageSelectionModal: React.FC<ImageSelectionModalProps> = ({
             onRetryLoad={onRetryLoad}
           />
         </div>
-
       </div>
     </FullScreenModal>
   );

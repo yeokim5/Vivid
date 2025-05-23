@@ -62,7 +62,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   return (
     <div className="image-carousel">
       <div className="image-prompt">
-        <h3>Image Description:</h3>
+        <h3>Choose an image that reflects this vibe:</h3>
         <p>{prompt}</p>
       </div>
 
