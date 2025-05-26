@@ -63,14 +63,13 @@ const LandingPage: React.FC = () => {
     // Fetch popular essays
     const fetchPopularEssays = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/essays");
+        const response = await fetch("http://localhost:5000/api/essays?sortBy=popular&limit=3");
         if (!response.ok) {
           throw new Error("Failed to fetch essays");
         }
         const data = await response.json();
-        // Sort by views and take top 3
-        const sortedEssays = data.sort((a: Essay, b: Essay) => b.views - a.views).slice(0, 3);
-        setEssays(sortedEssays);
+        // The essays are already sorted by views from the backend
+        setEssays(data.essays);
       } catch (error) {
         console.error("Error fetching essays:", error);
       }
@@ -165,7 +164,7 @@ const LandingPage: React.FC = () => {
               <div className="essay-content">
                 {essay.tags && essay.tags.length > 0 && (
                   <div className="essay-tags">
-                    {essay.tags.map(tag => (
+                    {essay.tags.filter(tag => tag !== 'html-essay').map(tag => (
                       <span key={tag} className="essay-tag">{tag}</span>
                     ))}
                   </div>

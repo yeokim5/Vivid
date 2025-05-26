@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showLogoutMenu, setShowLogoutMenu] = useState(false);
   const { user, isAuthenticated, login, logout } = useAuth();
 
   useEffect(() => {
@@ -33,6 +34,11 @@ const Navbar: React.FC = () => {
     } else {
       login();
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    setShowLogoutMenu(false);
   };
 
   return (
@@ -63,13 +69,21 @@ const Navbar: React.FC = () => {
           </li>
           <li className="nav-item">
             {isAuthenticated ? (
-              <Link
-                to="/profile"
-                className="nav-link nav-btn-secondary"
-                onClick={() => setMenuOpen(false)}
-              >
-                Profile
-              </Link>
+              <div className="profile-container">
+                <button
+                  className="nav-link nav-btn-secondary"
+                  onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+                >
+                  Profile
+                </button>
+                {showLogoutMenu && (
+                  <div className="logout-menu">
+                    <button onClick={handleLogout} className="logout-button">
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 className="nav-link nav-btn-google"

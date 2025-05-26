@@ -50,7 +50,7 @@ const ViewEssay: React.FC = () => {
     const fetchEssay = async () => {
       try {
         // Check if this user has already viewed this essay
-        const viewedEssays = JSON.parse(localStorage.getItem('magicEssay_viewedEssays') || '{}');
+        const viewedEssays = JSON.parse(localStorage.getItem('vivid_loginTimestamp') || '{}');
         const now = Date.now();
         const viewExpiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
         
@@ -72,7 +72,7 @@ const ViewEssay: React.FC = () => {
             if (viewResponse.ok) {
               // Mark this essay as viewed by this user with current timestamp
               viewedEssays[id] = now;
-              localStorage.setItem('magicEssay_viewedEssays', JSON.stringify(viewedEssays));
+              localStorage.setItem('vivid_loginTimestamp', JSON.stringify(viewedEssays));
             }
           } catch (error) {
             console.error("Failed to increment view count:", error);

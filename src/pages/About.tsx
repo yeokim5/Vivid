@@ -7,10 +7,10 @@ const About: React.FC = () => {
     <>
       <Navbar />
       <div className="about-container">
-        <h1>About MagicEssay</h1>
+        <h1>About Vivid</h1>
         <div className="about-content">
           <p>
-            MagicEssay is a platform that transforms your essays into beautiful, 
+            Vivid is a platform that transforms your essays into beautiful, 
             immersive visual experiences. Our AI-powered technology helps you create 
             engaging content that combines thoughtful writing with stunning visuals.
           </p>

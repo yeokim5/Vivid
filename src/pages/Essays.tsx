@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useInView } from 'react-intersection-observer';
 import Navbar from "../components/Navbar";
 import "../styles/Essays.css";
 
 interface Essay {
   _id: string;
   title: string;
-  subtitle: string;
-  header_background_image: string;
+  subtitle?: string;
+  header_background_image?: string;
   author: {
-    _id: string;
     name: string;
   };
   views: number;
@@ -23,26 +23,51 @@ const Essays: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"latest" | "popular">("latest");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchEssays = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/essays");
-        if (!response.ok) {
-          throw new Error("Failed to fetch essays");
-        }
-        const data = await response.json();
-        setEssays(data);
-      } catch (error) {
-        console.error("Error fetching essays:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { ref, inView } = useInView({
+    threshold: 0,
+  });
 
-    fetchEssays();
-  }, []);
+  const fetchEssays = useCallback(async (page: number) => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/essays?page=${page}&limit=10&sortBy=${sortBy}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch essays");
+      }
+      const data = await response.json();
+      
+      if (page === 1) {
+        setEssays(data.essays);
+      } else {
+        setEssays(prev => [...prev, ...data.essays]);
+      }
+      
+      setTotalPages(data.totalPages);
+      setHasMore(page < data.totalPages);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Error fetching essays:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [sortBy]);
+
+  useEffect(() => {
+    setEssays([]);
+    setCurrentPage(1);
+    setHasMore(true);
+    fetchEssays(1);
+  }, [fetchEssays, sortBy]);
+
+  useEffect(() => {
+    if (inView && hasMore && !loading) {
+      fetchEssays(currentPage + 1);
+    }
+  }, [inView, hasMore, loading, currentPage, fetchEssays]);
 
   const handleEssayClick = (essayId: string) => {
     navigate(`/essay/${essayId}`);
@@ -51,19 +76,16 @@ const Essays: React.FC = () => {
   const filteredEssays = essays
     .filter((essay) => {
       const matchesSearch = essay.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        essay.subtitle.toLowerCase().includes(searchTerm.toLowerCase());
+        (essay.subtitle && essay.subtitle.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesTag = !selectedTag || (essay.tags && essay.tags.includes(selectedTag));
       return matchesSearch && matchesTag;
     })
-    .sort((a, b) => {
-      if (sortBy === "latest") {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      } else {
-        return b.views - a.views;
-      }
-    });
+    .map(essay => ({
+      ...essay,
+      tags: essay.tags?.filter(tag => tag !== 'html-essay') || []
+    }));
 
-  const allTags = Array.from(new Set(essays.flatMap(essay => essay.tags || [])));
+  const allTags = Array.from(new Set(essays.flatMap(essay => essay.tags || []))).filter(tag => tag !== 'html-essay');
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -178,6 +200,14 @@ const Essays: React.FC = () => {
               </div>
             </div>
           ))
+        )}
+      </div>
+
+      {/* Loading indicator and infinite scroll trigger */}
+      <div ref={ref} className="h-10 flex items-center justify-center mt-4">
+        {loading && <div className="text-gray-500">Loading...</div>}
+        {!hasMore && essays.length > 0 && (
+          <div className="text-gray-500"></div>
         )}
       </div>
     </div>

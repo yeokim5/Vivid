@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../styles/VividGenerator.css";
 import ImageSelectionFlow from "./ImageSelectionFlow";
 import SuccessModal from "./SuccessModal";
+import { useAuth } from "../context/AuthContext";
 
 interface VividGeneratorProps {
   title: string;
@@ -30,6 +31,7 @@ interface EssayJsonResponse {
 }
 
 const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
+  const { isAuthenticated, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SectionData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -86,6 +88,12 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
   const handleMakeVivid = async () => {
     // Clear previous errors
     setError(null);
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      setError("Please sign in to use the Make it Vivid feature");
+      return;
+    }
 
     // Validate input
     if (!validateInput()) {
@@ -248,6 +256,14 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
     setShowSuccessModal(false);
   };
 
+  const handleButtonClick = async () => {
+    if (!isAuthenticated) {
+      await login();
+      return;
+    }
+    handleMakeVivid();
+  };
+
   return (
     <div className="vivid-generator">
       <div className="youtube-input-section">
@@ -260,14 +276,13 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
         />
       </div>
 
-
       <button
         className="analyze-btn"
-        onClick={handleMakeVivid}
+        onClick={handleButtonClick}
         disabled={isLoading}
       >
         <span className="btn-icon">✨</span>
-        {isLoading ? "Processing..." : "Make It Vivid"}
+        {isLoading ? "Processing..." : "Make it Vivid"}
       </button>
 
       {error && <div className="error-message">{error}</div>}

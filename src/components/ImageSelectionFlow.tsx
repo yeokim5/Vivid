@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ImageSelectionModal from "./ImageSelectionModal";
 import "../styles/ImageSelectionFlow.css";
 
@@ -29,6 +29,37 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [loadingSectionRetry, setLoadingSectionRetry] = useState<boolean>(false);
   const [queuedSections, setQueuedSections] = useState<string[]>([]);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Cleanup function to abort any ongoing requests
+  const cleanup = async () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+
+    // Call backend cleanup endpoint
+    try {
+      await fetch("http://localhost:5000/api/images/cleanup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sectionId: currentSectionIndex === -1 ? 'header_background_image' : `section_${sections[currentSectionIndex]?.section_number}_background_image`
+        })
+      });
+    } catch (err) {
+      console.error("Error cleaning up backend:", err);
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, [currentSectionIndex, sections]);
 
   // Initialize queue with header and all section numbers
   useEffect(() => {
@@ -61,6 +92,12 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
       return;
     }
 
+    // Abort any existing request
+    cleanup();
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+
     setLoadingSections(prev => ({
       ...prev,
       [key]: true,
@@ -77,6 +114,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
           maxImages: 10,
           sectionId: key,
         }),
+        signal: abortControllerRef.current.signal
       });
 
       if (!response.ok) {
@@ -96,7 +134,11 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
           [key]: [],
         }));
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('Request was aborted');
+        return;
+      }
       console.error(`Error loading images for ${key}:`, err);
       setAllSectionImages(prev => ({
         ...prev,
@@ -116,6 +158,12 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     
     if (!prompt) return;
 
+    // Abort any existing request
+    cleanup();
+
+    // Create new AbortController for this request
+    abortControllerRef.current = new AbortController();
+
     setLoadingSectionRetry(true);
 
     try {
@@ -128,6 +176,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
           prompt: prompt,
           maxImages: 10,
         }),
+        signal: abortControllerRef.current.signal
       });
 
       if (!response.ok) {
@@ -142,7 +191,11 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
           [currentKey]: data.urls,
         }));
       }
-    } catch (err) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.log('Request was aborted');
+        return;
+      }
       console.error("Error retrying image load:", err);
     } finally {
       setLoadingSectionRetry(false);
@@ -188,10 +241,16 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   // Check if current section is still loading
   const isCurrentSectionLoading = loadingSections[currentKey];
 
+  // Handle modal close
+  const handleClose = () => {
+    cleanup();
+    onClose();
+  };
+
   return (
     <ImageSelectionModal
       isOpen={sections.length > 0}
-      onClose={onClose}
+      onClose={handleClose}
       section={currentSectionIndex === -1 ? {
         section_number: 0,
         content: "Choose Background For Title Section",
