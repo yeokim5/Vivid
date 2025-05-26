@@ -43,6 +43,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
   const [essayCreated, setEssayCreated] = useState(false);
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState<string>("");
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -65,6 +66,21 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
     }
 
     return true;
+  };
+
+  const extractYoutubeVideoCode = (url: string): string => {
+    if (!url) return "";
+    
+    try {
+      // Handle different YouTube URL formats
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      
+      return (match && match[2].length === 11) ? match[2] : "";
+    } catch (error) {
+      console.error("Error extracting YouTube video code:", error);
+      return "";
+    }
   };
 
   const handleMakeVivid = async () => {
@@ -164,6 +180,9 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
           throw new Error("Not authenticated. Please log in to create an essay.");
         }
 
+        // Extract YouTube video code if URL is provided
+        const youtubeVideoCode = extractYoutubeVideoCode(youtubeUrl);
+
         // Create the essay with HTML content
         const response = await fetch(
           "http://localhost:5000/api/essays/html",
@@ -177,6 +196,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
               title: updatedResult.title,
               subtitle: updatedResult.subtitle,
               header_background_image: selectedImages.header_background_image?.startsWith('http') ? selectedImages.header_background_image : '',
+              youtubeVideoCode,
               content: {
                 title: updatedResult.title,
                 subtitle: updatedResult.subtitle,
@@ -200,23 +220,24 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
         }
 
         const data: EssayJsonResponse = await response.json();
+        console.log("Essay creation response:", data);
 
-        if (data.success) {
+        if (data.success && data.essayId) {
           setEssayCreated(true);
           setEssayViewUrl(`/essay/${data.essayId}`);
           setShowSuccessModal(true);
+          setShowImageSelectionFlow(false); // Close the image selection flow
         } else {
           throw new Error(data.message || "Failed to create essay");
         }
       } catch (err) {
+        console.error("Error creating essay:", err);
         setError(
           err instanceof Error ? err.message : "Failed to create essay"
         );
-        console.error("Error creating essay:", err);
+        setShowImageSelectionFlow(false);
       }
     }
-
-    setShowImageSelectionFlow(false);
   };
 
   const handleCloseImageSelectionFlow = () => {
@@ -229,6 +250,17 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
 
   return (
     <div className="vivid-generator">
+      <div className="youtube-input-section">
+        <input
+          type="text"
+          className="youtube-url-input"
+          placeholder="(Optional) Paste YouTube video URL for background music"
+          value={youtubeUrl}
+          onChange={(e) => setYoutubeUrl(e.target.value)}
+        />
+      </div>
+
+
       <button
         className="analyze-btn"
         onClick={handleMakeVivid}
@@ -249,11 +281,11 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
         />
       )}
 
-      {essayCreated && essayViewUrl && (
+      {showSuccessModal && (
         <SuccessModal
           isOpen={showSuccessModal}
+          essayViewUrl={essayViewUrl || ""}
           onClose={handleCloseSuccessModal}
-          essayViewUrl={essayViewUrl}
         />
       )}
     </div>

@@ -4,6 +4,20 @@ import Navbar from "../components/Navbar";
 import VividGenerator from "../components/VividGenerator";
 import "../styles/LandingPage.css";
 
+interface Essay {
+  _id: string;
+  title: string;
+  subtitle: string;
+  header_background_image: string;
+  author: {
+    _id: string;
+    name: string;
+  };
+  views: number;
+  createdAt: string;
+  tags?: string[];
+}
+
 // Placeholder for popular essays data
 const popularEssays = [
   {
@@ -34,6 +48,7 @@ const popularEssays = [
 ];
 
 const LandingPage: React.FC = () => {
+  const [essays, setEssays] = useState<Essay[]>([]);
   const [essayTitle, setEssayTitle] = useState("");
   const [essayText, setEssayText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -45,10 +60,25 @@ const LandingPage: React.FC = () => {
       document.querySelector(".hero-content")?.classList.add("visible");
     }, 100);
 
+    // Fetch popular essays
+    const fetchPopularEssays = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/essays");
+        if (!response.ok) {
+          throw new Error("Failed to fetch essays");
+        }
+        const data = await response.json();
+        // Sort by views and take top 3
+        const sortedEssays = data.sort((a: Essay, b: Essay) => b.views - a.views).slice(0, 3);
+        setEssays(sortedEssays);
+      } catch (error) {
+        console.error("Error fetching essays:", error);
+      }
+    };
+
+    fetchPopularEssays();
     return () => clearTimeout(timer);
   }, []);
-
-  
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEssayTitle(e.target.value);
@@ -66,6 +96,19 @@ const LandingPage: React.FC = () => {
 
   const wordCount = essayText.trim() ? essayText.trim().split(/\s+/).length : 0;
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  };
+
+  const handleExploreMore = () => {
+    navigate('/essays');
+  };
+
   return (
     <div className="landing-container">
       <Navbar />
@@ -76,9 +119,6 @@ const LandingPage: React.FC = () => {
           <h2>Transform Your Essay Into a Visual Experience</h2>
 
           <div className="essay-input-container">
-            <div className="input-label">
-              <span>Start with your idea or essay</span>
-            </div>
             <input
               type="text"
               className="essay-title-input"
@@ -106,22 +146,48 @@ const LandingPage: React.FC = () => {
       </div>
 
       <div className="popular-essays-section">
-        <h2>Today's Most Viewed Essays</h2>
+        <h2>Vivid Essays</h2>
+        <p className="section-subtitle">Discover our readers' favorite pieces</p>
+        
         <div className="essays-grid">
-          {popularEssays.map((essay) => (
-            <div className="essay-card" key={essay.id}>
-              <div className="essay-tag">{essay.tag}</div>
-              <h3>{essay.title}</h3>
-              <p className="essay-excerpt">{essay.excerpt}</p>
-              <div className="essay-meta">
-                <span className="essay-author">By {essay.author}</span>
-                <span className="essay-views">{essay.views} views</span>
+          {essays.map((essay) => (
+            <div 
+              key={essay._id} 
+              className="essay-card"
+              onClick={() => navigate(`/essay/${essay._id}`)}
+            >
+              {essay.header_background_image && (
+                <div 
+                  className="essay-header-image"
+                  style={{ backgroundImage: `url(${essay.header_background_image})` }}
+                />
+              )}
+              <div className="essay-content">
+                {essay.tags && essay.tags.length > 0 && (
+                  <div className="essay-tags">
+                    {essay.tags.map(tag => (
+                      <span key={tag} className="essay-tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+                <h3>{essay.title}</h3>
+                <p className="essay-excerpt">{essay.subtitle}</p>
+                <div className="essay-meta">
+                  <div className="meta-left">
+                    <span className="essay-author">By {essay.author.name}</span>
+                    <span className="essay-date">{formatDate(essay.createdAt)}</span>
+                  </div>
+                  <span className="essay-views">{essay.views} views</span>
+                </div>
               </div>
             </div>
           ))}
         </div>
+
         <div className="explore-more">
-          <button className="explore-btn">Explore More Essays</button>
+          <button className="explore-btn" onClick={handleExploreMore}>
+            Explore More Essays
+          </button>
         </div>
       </div>
     </div>
