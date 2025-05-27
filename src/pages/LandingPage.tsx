@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import VividGenerator from "../components/VividGenerator";
+import BackgroundEffects from "../components/BackgroundEffects";
+import CustomizeEssay from "../components/CustomizeEssay";
+import FluidBackground from "../components/FluidBackground";
 import "../styles/LandingPage.css";
 
 interface Essay {
@@ -57,6 +60,10 @@ const LandingPage: React.FC = () => {
   const [selectedFont, setSelectedFont] = useState("Playfair Display"); // Default font
   const [boxBgColor, setBoxBgColor] = useState("#585858"); // Default box background color
   const [boxOpacity, setBoxOpacity] = useState(0.5); // Default box opacity
+  const [selectedBackgroundEffect, setSelectedBackgroundEffect] = useState("none"); // Default background effect
+  const [isPrivate, setIsPrivate] = useState(false); // Add privacy state
+  const [youtubeUrl, setYoutubeUrl] = useState(""); // Add YouTube URL state
+  const [showCustomize, setShowCustomize] = useState(false); // State to toggle customize section
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -111,6 +118,10 @@ const LandingPage: React.FC = () => {
 
   const handleExploreMore = () => {
     navigate('/essays');
+  };
+
+  const toggleCustomizeSection = () => {
+    setShowCustomize(!showCustomize);
   };
 
   const fontOptions = [
@@ -168,11 +179,9 @@ const LandingPage: React.FC = () => {
         font-family: "${selectedFont}", sans-serif !important;
       }
       
-      /* Explicitly set font for all other elements to prevent inheritance */
-      body, h1, h2, h3, h4, h5, h6, p, span, div:not(.style-preview *) {
-        font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, 
-          "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", 
-          "Helvetica Neue", sans-serif;
+      /* Explicitly set font for important elements outside the preview section */
+      .customize-toggle-btn, .explore-btn, .nav-btn-secondary, button, .profile, .profile-menu-item {
+        font-family: "Merriweather", monospace !important;
       }
     `;
     style.id = 'dynamic-font-style';
@@ -200,113 +209,12 @@ const LandingPage: React.FC = () => {
       <Navbar />
 
       <div className="hero-section">
+        <FluidBackground complexity={2} />
         <div className="hero-content">
-          <h1>Vivid</h1>
+          <h1 style={{fontFamily: "Ariel"}}>Vivid</h1>
           <h2>Transform Your Essay Into a Visual Experience</h2>
 
           <div className="essay-input-container">
-            {/* Custom Styling Options */}
-            <div className="styling-options">
-              <h3 className="styling-title">Customize Your Essay Appearance</h3>
-              
-              <div className="styling-grid">
-                <div className="styling-item">
-                  <label>Title Color</label>
-                  <div className="color-input-container">
-                    <input
-                      type="color"
-                      value={titleColor}
-                      onChange={(e) => setTitleColor(e.target.value)}
-                      className="color-picker"
-                    />
-                    <span className="color-value">{titleColor}</span>
-                  </div>
-                </div>
-                
-                <div className="styling-item">
-                  <label>Text Color</label>
-                  <div className="color-input-container">
-                    <input
-                      type="color"
-                      value={textColor}
-                      onChange={(e) => setTextColor(e.target.value)}
-                      className="color-picker"
-                    />
-                    <span className="color-value">{textColor}</span>
-                  </div>
-                </div>
-                
-                <div className="styling-item">
-                  <label>Box Background Color</label>
-                  <div className="color-input-container">
-                    <input
-                      type="color"
-                      value={boxBgColor}
-                      onChange={(e) => setBoxBgColor(e.target.value)}
-                      className="color-picker"
-                    />
-                    <span className="color-value">{boxBgColor}</span>
-                  </div>
-                </div>
-                
-                <div className="styling-item">
-                  <label>Box Opacity: {boxOpacity.toFixed(2)}</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={boxOpacity}
-                    onChange={(e) => setBoxOpacity(parseFloat(e.target.value))}
-                    className="opacity-slider"
-                  />
-                </div>
-                
-                <div className="styling-item">
-                  <label>Font Family</label>
-                  <select 
-                    value={selectedFont}
-                    onChange={(e) => setSelectedFont(e.target.value)}
-                    className="font-selector"
-                  >
-                    {fontOptions.map(font => (
-                      <option 
-                        key={font} 
-                        value={font} 
-                        style={{ fontFamily: font }}
-                      >
-                        {font}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              
-              <div className="style-preview">
-                <p>Preview:</p>
-                <div 
-                  style={{ 
-                    background: `rgba(${parseInt(boxBgColor.slice(1, 3), 16)}, ${parseInt(boxBgColor.slice(3, 5), 16)}, ${parseInt(boxBgColor.slice(5, 7), 16)}, ${boxOpacity})`,
-                    padding: '20px',
-                    borderRadius: '8px',
-                    margin: '10px 0'
-                  }}
-                >
-                  <h4 
-                    style={{ 
-                      color: titleColor, 
-                      display: "inline-block"
-                    }}
-                  >
-                    Sample Title
-                  </h4>
-                  <p style={{ color: textColor }}>
-                    This is how your essay text will appear.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             <input
               type="text"
               className="essay-title-input"
@@ -322,6 +230,38 @@ const LandingPage: React.FC = () => {
             />
             <div className="word-count">{wordCount}/1000 words</div>
 
+            {/* Customize Toggle Button */}
+            <button 
+              className="customize-toggle-btn"
+              onClick={toggleCustomizeSection}
+            >
+              Customize Your Essay Appearance
+              <span className="toggle-arrow">{showCustomize ? '▲' : '▼'}</span>
+            </button>
+
+            {/* Conditionally render the customize component */}
+            {showCustomize && (
+              <CustomizeEssay
+                titleColor={titleColor}
+                setTitleColor={setTitleColor}
+                textColor={textColor}
+                setTextColor={setTextColor}
+                boxBgColor={boxBgColor}
+                setBoxBgColor={setBoxBgColor}
+                boxOpacity={boxOpacity}
+                setBoxOpacity={setBoxOpacity}
+                selectedFont={selectedFont}
+                setSelectedFont={setSelectedFont}
+                selectedBackgroundEffect={selectedBackgroundEffect}
+                setSelectedBackgroundEffect={setSelectedBackgroundEffect}
+                isPrivate={isPrivate}
+                setIsPrivate={setIsPrivate}
+                youtubeUrl={youtubeUrl}
+                setYoutubeUrl={setYoutubeUrl}
+                fontOptions={fontOptions}
+              />
+            )}
+
             <VividGenerator 
               title={essayTitle} 
               content={essayText} 
@@ -330,14 +270,13 @@ const LandingPage: React.FC = () => {
               fontFamily={selectedFont}
               boxBgColor={boxBgColor}
               boxOpacity={boxOpacity}
+              backgroundEffect={selectedBackgroundEffect}
+              isPrivate={isPrivate}
+              youtubeUrl={youtubeUrl}
+              onPrivacyChange={setIsPrivate}
+              onYoutubeUrlChange={setYoutubeUrl}
             />
           </div>
-        </div>
-
-        <div className="floating-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
         </div>
       </div>
 

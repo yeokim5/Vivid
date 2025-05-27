@@ -1,0 +1,33 @@
+/* App.css */
+:root {
+  --primary-color: #5d5fe2;
+  --secondary-color: #9867f0;
+  --accent-color: #ff6b8b;
+  --text-color: #24292e;
+  --light-bg: #f8fafc;
+  --white: #ffffff;
+  --gray: #f0f2f5;
+  --dark-gray: #343a40;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Simple Footer */
+footer {
+  background-color: var(--dark-gray);
+  color: var(--white);
+  padding: 20px;
+  text-align: center;
+  margin-top: auto;
+}
+
+footer p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+} 

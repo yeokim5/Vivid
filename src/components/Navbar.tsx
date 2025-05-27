@@ -44,7 +44,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
       <div className="navbar-container">
-        <Link to="/" className="navbar-logo">
+        <Link to="/" className="navbar-logo" style={{fontFamily: "Ariel"}}>
           Vivid
         </Link>
 
@@ -71,7 +71,7 @@ const Navbar: React.FC = () => {
             {isAuthenticated ? (
               <div className="profile-container">
                 <button
-                  className="nav-link nav-btn-secondary"
+                  className="nav-link profile-nav-link"
                   onClick={() => setShowLogoutMenu(!showLogoutMenu)}
                 >
                   Profile

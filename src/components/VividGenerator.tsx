@@ -7,11 +7,16 @@ import { useAuth } from "../context/AuthContext";
 interface VividGeneratorProps {
   title: string;
   content: string;
-  titleColor?: string;
-  textColor?: string;
-  fontFamily?: string;
-  boxBgColor?: string;
-  boxOpacity?: number;
+  titleColor: string;
+  textColor: string;
+  fontFamily: string;
+  boxBgColor: string;
+  boxOpacity: number;
+  backgroundEffect: string;
+  isPrivate: boolean;
+  youtubeUrl: string;
+  onPrivacyChange: (isPrivate: boolean) => void;
+  onYoutubeUrlChange: (url: string) => void;
 }
 
 interface Section {
@@ -42,7 +47,12 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   textColor = "#f8f9fa", 
   fontFamily = "Playfair Display",
   boxBgColor = "#585858",
-  boxOpacity = 0.5
+  boxOpacity = 0.5,
+  backgroundEffect = "none",
+  isPrivate = false,
+  youtubeUrl = "",
+  onPrivacyChange,
+  onYoutubeUrlChange
 }) => {
   const { isAuthenticated, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -58,8 +68,6 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   const [essayCreated, setEssayCreated] = useState(false);
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [youtubeUrl, setYoutubeUrl] = useState<string>("");
-  const [isPrivate, setIsPrivate] = useState<boolean>(false);
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -225,6 +233,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
               fontFamily,
               boxBgColor,
               boxOpacity,
+              backgroundEffect,
               content: {
                 title: updatedResult.title,
                 subtitle: updatedResult.subtitle,
@@ -287,37 +296,8 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
   return (
     <div className="vivid-generator">
-      <div className="privacy-toggle">
-        <label className="toggle-label">
-          <input
-            type="checkbox"
-            checked={isPrivate}
-            onChange={(e) => setIsPrivate(e.target.checked)}
-          />
-          <span className="toggle-switch"></span>
-          <span className="toggle-text">
-            {isPrivate ? "Private" : "Public"}
-          </span>
-        </label>
-        <span className="privacy-tooltip">
-          {isPrivate 
-            ? "Only you can see this essay in your profile" 
-            : "Your essay will be visible to everyone"}
-        </span>
-      </div>
-
-      <div className="youtube-input-section">
-        <input
-          type="text"
-          className="youtube-url-input"
-          placeholder="(Optional) Paste YouTube video URL for background music"
-          value={youtubeUrl}
-          onChange={(e) => setYoutubeUrl(e.target.value)}
-        />
-      </div>
-
       <button
-        className="analyze-btn"
+        className="analyze-btn vivid-button"
         onClick={handleButtonClick}
         disabled={isLoading}
       >

@@ -8,9 +8,7 @@ import NotFound from "./pages/NotFound";
 import ViewEssay from "./pages/ViewEssay";
 import Essays from "./pages/Essays";
 import UserEssays from "./pages/UserEssays";
-
-// Placeholder components - would be imported from actual components
-const AboutPage: React.FC = () => <div>About Page</div>;
+import "./styles/App.css";
 
 const App: React.FC = () => {
   const location = useLocation();
