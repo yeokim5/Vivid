@@ -113,7 +113,7 @@ const Essays: React.FC = () => {
       <Navbar />
       
       <div className="essays-hero">
-        <h1>Explore Essays</h1>
+        <h1>Explore</h1>
         <p className="hero-subtitle">Discover thought-provoking essays from creative minds</p>
         
         <div className="search-bar">

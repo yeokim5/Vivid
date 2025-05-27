@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
               className="nav-link"
               onClick={() => setMenuOpen(false)}
             >
-              Essays
+              Explore
             </Link>
           </li>
           <li className="nav-item">
@@ -78,6 +78,13 @@ const Navbar: React.FC = () => {
                 </button>
                 {showLogoutMenu && (
                   <div className="logout-menu">
+                    <Link 
+                      to="/my-essays" 
+                      className="profile-menu-item"
+                      onClick={() => setShowLogoutMenu(false)}
+                    >
+                      My Essays
+                    </Link>
                     <button onClick={handleLogout} className="logout-button">
                       Logout
                     </button>

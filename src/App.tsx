@@ -7,6 +7,7 @@ import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import ViewEssay from "./pages/ViewEssay";
 import Essays from "./pages/Essays";
+import UserEssays from "./pages/UserEssays";
 
 // Placeholder components - would be imported from actual components
 const AboutPage: React.FC = () => <div>About Page</div>;
@@ -21,6 +22,7 @@ const App: React.FC = () => {
         <Routes location={location}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/essays" element={<Essays />} />
+          <Route path="/my-essays" element={<UserEssays />} />
           <Route path="/about" element={<About />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/essay/:id" element={<ViewEssay />} />
