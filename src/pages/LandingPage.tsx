@@ -52,6 +52,11 @@ const LandingPage: React.FC = () => {
   const [essayTitle, setEssayTitle] = useState("");
   const [essayText, setEssayText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [titleColor, setTitleColor] = useState("#f8f9fa"); // Default white
+  const [textColor, setTextColor] = useState("#f8f9fa"); // Default white
+  const [selectedFont, setSelectedFont] = useState("Playfair Display"); // Default font
+  const [boxBgColor, setBoxBgColor] = useState("#585858"); // Default box background color
+  const [boxOpacity, setBoxOpacity] = useState(0.5); // Default box opacity
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -108,6 +113,88 @@ const LandingPage: React.FC = () => {
     navigate('/essays');
   };
 
+  const fontOptions = [
+    "Playfair Display", 
+    "Inter", 
+    "Roboto", 
+    "Montserrat", 
+    "Lora", 
+    "Merriweather", 
+    "Open Sans"
+  ];
+
+  // Use useEffect to load fonts for the dropdown
+  useEffect(() => {
+    // We'll use Web Font Loader to load fonts only for the preview section
+    // This avoids affecting the entire page
+    const loadFonts = async () => {
+      // Instead of loading all fonts at once, we'll just ensure they're available for the dropdown
+      // but not apply them globally
+      const WebFontConfig = {
+        google: {
+          families: fontOptions.map(font => `${font}:400,700`)
+        },
+        classes: false,  // Don't add classes to the HTML element
+        events: false    // Don't trigger events
+      };
+      
+      // Create a script element for Web Font Loader
+      const script = document.createElement('script');
+      script.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js';
+      script.async = true;
+      
+      // Once the script is loaded, configure it
+      script.onload = () => {
+        // @ts-ignore
+        window.WebFont.load(WebFontConfig);
+      };
+      
+      document.head.appendChild(script);
+    };
+    
+    loadFonts();
+  }, []);
+  
+  // Separate useEffect to apply the selected font ONLY to the preview section
+  useEffect(() => {
+    // Create a style element to scope the font to the preview only
+    const style = document.createElement('style');
+    
+    // Create the stylesheet with scoped selectors for the preview only
+    // We use !important to ensure it doesn't leak to other elements
+    style.textContent = `
+      /* Only apply font to preview elements */
+      .style-preview h4, .style-preview p {
+        font-family: "${selectedFont}", sans-serif !important;
+      }
+      
+      /* Explicitly set font for all other elements to prevent inheritance */
+      body, h1, h2, h3, h4, h5, h6, p, span, div:not(.style-preview *) {
+        font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, 
+          "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", 
+          "Helvetica Neue", sans-serif;
+      }
+    `;
+    style.id = 'dynamic-font-style';
+    
+    // Remove any existing dynamic font style
+    const existingStyle = document.getElementById('dynamic-font-style');
+    if (existingStyle) {
+      document.head.removeChild(existingStyle);
+    }
+    
+    // Add the new style
+    document.head.appendChild(style);
+    
+    return () => {
+      // Cleanup function
+      const styleToRemove = document.getElementById('dynamic-font-style');
+      if (styleToRemove) {
+        document.head.removeChild(styleToRemove);
+      }
+    };
+  }, [selectedFont]);
+
   return (
     <div className="landing-container">
       <Navbar />
@@ -118,6 +205,108 @@ const LandingPage: React.FC = () => {
           <h2>Transform Your Essay Into a Visual Experience</h2>
 
           <div className="essay-input-container">
+            {/* Custom Styling Options */}
+            <div className="styling-options">
+              <h3 className="styling-title">Customize Your Essay Appearance</h3>
+              
+              <div className="styling-grid">
+                <div className="styling-item">
+                  <label>Title Color</label>
+                  <div className="color-input-container">
+                    <input
+                      type="color"
+                      value={titleColor}
+                      onChange={(e) => setTitleColor(e.target.value)}
+                      className="color-picker"
+                    />
+                    <span className="color-value">{titleColor}</span>
+                  </div>
+                </div>
+                
+                <div className="styling-item">
+                  <label>Text Color</label>
+                  <div className="color-input-container">
+                    <input
+                      type="color"
+                      value={textColor}
+                      onChange={(e) => setTextColor(e.target.value)}
+                      className="color-picker"
+                    />
+                    <span className="color-value">{textColor}</span>
+                  </div>
+                </div>
+                
+                <div className="styling-item">
+                  <label>Box Background Color</label>
+                  <div className="color-input-container">
+                    <input
+                      type="color"
+                      value={boxBgColor}
+                      onChange={(e) => setBoxBgColor(e.target.value)}
+                      className="color-picker"
+                    />
+                    <span className="color-value">{boxBgColor}</span>
+                  </div>
+                </div>
+                
+                <div className="styling-item">
+                  <label>Box Opacity: {boxOpacity.toFixed(2)}</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={boxOpacity}
+                    onChange={(e) => setBoxOpacity(parseFloat(e.target.value))}
+                    className="opacity-slider"
+                  />
+                </div>
+                
+                <div className="styling-item">
+                  <label>Font Family</label>
+                  <select 
+                    value={selectedFont}
+                    onChange={(e) => setSelectedFont(e.target.value)}
+                    className="font-selector"
+                  >
+                    {fontOptions.map(font => (
+                      <option 
+                        key={font} 
+                        value={font} 
+                        style={{ fontFamily: font }}
+                      >
+                        {font}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              
+              <div className="style-preview">
+                <p>Preview:</p>
+                <div 
+                  style={{ 
+                    background: `rgba(${parseInt(boxBgColor.slice(1, 3), 16)}, ${parseInt(boxBgColor.slice(3, 5), 16)}, ${parseInt(boxBgColor.slice(5, 7), 16)}, ${boxOpacity})`,
+                    padding: '20px',
+                    borderRadius: '8px',
+                    margin: '10px 0'
+                  }}
+                >
+                  <h4 
+                    style={{ 
+                      color: titleColor, 
+                      display: "inline-block"
+                    }}
+                  >
+                    Sample Title
+                  </h4>
+                  <p style={{ color: textColor }}>
+                    This is how your essay text will appear.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <input
               type="text"
               className="essay-title-input"
@@ -133,7 +322,15 @@ const LandingPage: React.FC = () => {
             />
             <div className="word-count">{wordCount}/1000 words</div>
 
-            <VividGenerator title={essayTitle} content={essayText} />
+            <VividGenerator 
+              title={essayTitle} 
+              content={essayText} 
+              titleColor={titleColor}
+              textColor={textColor}
+              fontFamily={selectedFont}
+              boxBgColor={boxBgColor}
+              boxOpacity={boxOpacity}
+            />
           </div>
         </div>
 

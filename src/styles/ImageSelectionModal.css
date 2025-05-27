@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  min-height: 0;
   background: rgba(255, 255, 255, 0.02);
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .section-content {
@@ -34,13 +34,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   padding: 15px;
-  overflow: hidden;
   position: relative;
   width: 100%;
-  min-height: 0;
 }
 
 /* Enhance the carousel for full-screen display */
@@ -51,17 +49,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  height: 100%;
-  min-height: 0;
+  gap: 20px;
+  padding-bottom: 20px;
 }
 
 .image-selection-content .image-prompt {
   width: 100%;
   max-width: 800px;
-  margin: 0 auto;
+  margin: 0 auto 15px;
   text-align: center;
-  flex-shrink: 0;
 }
 
 .image-selection-content .image-prompt h3 {
@@ -84,26 +80,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
-  min-height: 0;
 }
 
 .image-selection-content .carousel-image-container {
   width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: center;
   position: relative;
-  height: 100%;
+  background-color: #111;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
 }
 
 .image-selection-content .carousel-image {
-  max-height: 50vh;
-  max-width: 100%;
-  width: auto;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
 }
 
 .image-selection-content .carousel-arrow {
@@ -123,15 +121,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .image-selection-content .carousel-arrow.prev-arrow {
-  left: -15px;
+  left: 10px;
 }
 
 .image-selection-content .carousel-arrow.next-arrow {
-  right: -15px;
+  right: 10px;
 }
 
 .image-selection-content .carousel-arrow:hover {
@@ -149,12 +146,12 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-weight: 500;
-  flex-shrink: 0;
   box-shadow: 0 4px 15px rgba(74, 144, 226, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   position: relative;
   overflow: hidden;
+  margin-top: 15px;
 }
 
 .image-selection-content .select-image-button::before {
@@ -208,24 +205,33 @@
   }
 
   .image-selection-content .carousel-image {
-    max-height: 45vh;
+    max-height: 35vh;
   }
 
   .image-selection-content .carousel-arrow {
     width: 30px;
     height: 30px;
     font-size: 1.2rem;
+    top: 30%;
   }
 
   .image-selection-content .carousel-arrow.prev-arrow {
-    left: -12px;
+    left: 5px;
   }
 
   .image-selection-content .carousel-arrow.next-arrow {
-    right: -12px;
+    right: 5px;
   }
 
   .image-selection-content .image-prompt {
     padding: 0 10px;
+    margin-bottom: 10px;
+  }
+  
+  .image-selection-content .select-image-button {
+    padding: 10px 24px;
+    font-size: 0.9rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
   }
 } 

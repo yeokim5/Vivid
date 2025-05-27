@@ -49,33 +49,54 @@ const ViewEssay: React.FC = () => {
   useEffect(() => {
     const fetchEssay = async () => {
       try {
-        // Check if this user has already viewed this essay
-        const viewedEssays = JSON.parse(localStorage.getItem('vivid_loginTimestamp') || '{}');
-        const now = Date.now();
-        const viewExpiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-        
-        // Clean up expired views
-        Object.keys(viewedEssays).forEach(essayId => {
-          if (now - viewedEssays[essayId] > viewExpiry) {
-            delete viewedEssays[essayId];
-          }
-        });
-        
-        const hasViewed = viewedEssays[id || ''];
-
-        // If this is the first view or the view has expired, increment the view count
-        if (!hasViewed && id) {
+        // Handle view counting
+        if (id) {
+          const viewTrackingKey = 'vivid_viewedEssays';
+          let viewedEssays: {[key: string]: number} = {};
+          
+          // Try to get existing view data from localStorage
           try {
-            const viewResponse = await fetch(`${API_URL}/essays/${id}/view`, {
-              method: 'POST'
-            });
-            if (viewResponse.ok) {
-              // Mark this essay as viewed by this user with current timestamp
-              viewedEssays[id] = now;
-              localStorage.setItem('vivid_loginTimestamp', JSON.stringify(viewedEssays));
+            const storedValue = localStorage.getItem(viewTrackingKey);
+            if (storedValue) {
+              const parsed = JSON.parse(storedValue);
+              if (parsed && typeof parsed === 'object') {
+                viewedEssays = parsed;
+              }
             }
-          } catch (error) {
-            console.error("Failed to increment view count:", error);
+          } catch (e) {
+            console.error("Error reading view tracking data:", e);
+            // Continue with empty object if parsing fails
+          }
+          
+          const now = Date.now();
+          const viewExpiry = 24 * 60 * 60 * 1000; // 24 hours
+          
+          // Remove expired entries
+          Object.keys(viewedEssays).forEach(key => {
+            const timestamp = viewedEssays[key];
+            if (now - timestamp > viewExpiry) {
+              delete viewedEssays[key];
+            }
+          });
+          
+          // Check if this essay was recently viewed
+          const hasRecentView = viewedEssays[id] !== undefined;
+          
+          // If not viewed recently, increment the view count
+          if (!hasRecentView) {
+            try {
+              const response = await fetch(`${API_URL}/essays/${id}/view`, {
+                method: 'POST'
+              });
+              
+              if (response.ok) {
+                // Mark as viewed
+                viewedEssays[id] = now;
+                localStorage.setItem(viewTrackingKey, JSON.stringify(viewedEssays));
+              }
+            } catch (error) {
+              console.error("Failed to increment view count:", error);
+            }
           }
         }
 

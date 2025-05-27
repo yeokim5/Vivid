@@ -389,4 +389,30 @@
   .essay-excerpt {
     font-size: 1rem;
   }
+}
+
+.private-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.private-icon {
+  font-size: 16px;
+  color: white;
+}
+
+.title-lock-icon {
+  font-size: 0.8em;
+  margin-left: 8px;
+  color: #666;
+  vertical-align: middle;
 } 

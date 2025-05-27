@@ -14,6 +14,7 @@ interface Essay {
   createdAt: string;
   views: number;
   tags: string[];
+  isPrivate: boolean;
   author?: {
     name?: string;
     _id?: string;
@@ -165,6 +166,11 @@ const UserEssays: React.FC = () => {
                     />
                   )}
                   <div className="essay-content">
+                    {essay.isPrivate && (
+                      <div className="private-indicator">
+                        <span className="private-icon">🔒</span>
+                      </div>
+                    )}
                     {essay.tags && essay.tags.length > 0 && (
                       <div className="essay-tags">
                         {essay.tags
@@ -174,7 +180,10 @@ const UserEssays: React.FC = () => {
                           ))}
                       </div>
                     )}
-                    <h3>{essay.title}</h3>
+                    <h3>
+                      {essay.title}
+                      {essay.isPrivate && <span className="title-lock-icon" title="Private essay">🔒</span>}
+                    </h3>
                     {essay.subtitle && (
                       <p className="essay-excerpt">{essay.subtitle}</p>
                     )}

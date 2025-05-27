@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import ImageSelectionModal from "./ImageSelectionModal";
 import "../styles/ImageSelectionFlow.css";
 
@@ -29,15 +29,9 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [loadingSectionRetry, setLoadingSectionRetry] = useState<boolean>(false);
   const [queuedSections, setQueuedSections] = useState<string[]>([]);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Cleanup function to abort any ongoing requests
+  // Cleanup function to call backend cleanup endpoint
   const cleanup = async () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
-
     // Call backend cleanup endpoint
     try {
       await fetch("http://localhost:5000/api/images/cleanup", {
@@ -54,12 +48,12 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     }
   };
 
-  // Cleanup on unmount
+  // Cleanup on unmount only
   useEffect(() => {
     return () => {
       cleanup();
     };
-  }, [currentSectionIndex, sections]);
+  }, []);  // Remove dependencies, only run on unmount
 
   // Initialize queue with header and all section numbers
   useEffect(() => {
@@ -92,12 +86,6 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
       return;
     }
 
-    // Abort any existing request
-    cleanup();
-
-    // Create new AbortController for this request
-    abortControllerRef.current = new AbortController();
-
     setLoadingSections(prev => ({
       ...prev,
       [key]: true,
@@ -113,8 +101,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
           prompt: prompt,
           maxImages: 10,
           sectionId: key,
-        }),
-        signal: abortControllerRef.current.signal
+        })
       });
 
       if (!response.ok) {
@@ -135,10 +122,6 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
         }));
       }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        console.log('Request was aborted');
-        return;
-      }
       console.error(`Error loading images for ${key}:`, err);
       setAllSectionImages(prev => ({
         ...prev,
@@ -158,12 +141,6 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     
     if (!prompt) return;
 
-    // Abort any existing request
-    cleanup();
-
-    // Create new AbortController for this request
-    abortControllerRef.current = new AbortController();
-
     setLoadingSectionRetry(true);
 
     try {
@@ -175,8 +152,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
         body: JSON.stringify({
           prompt: prompt,
           maxImages: 10,
-        }),
-        signal: abortControllerRef.current.signal
+        })
       });
 
       if (!response.ok) {
@@ -192,10 +168,6 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
         }));
       }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        console.log('Request was aborted');
-        return;
-      }
       console.error("Error retrying image load:", err);
     } finally {
       setLoadingSectionRetry(false);
@@ -215,6 +187,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     setSelectedImages(newSelectedImages);
 
     if (currentSectionIndex < sections.length - 1) {
+      // Simply move to the next section
       setCurrentSectionIndex(currentSectionIndex + 1);
     } else {
       // Pass the new state directly instead of using the state variable
@@ -225,6 +198,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
 
   const handleSkipSection = () => {
     if (currentSectionIndex < sections.length - 1) {
+      // Simply move to the next section
       setCurrentSectionIndex(currentSectionIndex + 1);
     } else {
       onImagesSelected(selectedImages);
@@ -243,7 +217,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
 
   // Handle modal close
   const handleClose = () => {
-    cleanup();
+    cleanup();  // Call cleanup when user closes the modal
     onClose();
   };
 

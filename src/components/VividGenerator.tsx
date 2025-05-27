@@ -7,6 +7,11 @@ import { useAuth } from "../context/AuthContext";
 interface VividGeneratorProps {
   title: string;
   content: string;
+  titleColor?: string;
+  textColor?: string;
+  fontFamily?: string;
+  boxBgColor?: string;
+  boxOpacity?: number;
 }
 
 interface Section {
@@ -30,7 +35,15 @@ interface EssayJsonResponse {
   viewUrl: string;
 }
 
-const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
+const VividGenerator: React.FC<VividGeneratorProps> = ({ 
+  title, 
+  content, 
+  titleColor = "#f8f9fa", 
+  textColor = "#f8f9fa", 
+  fontFamily = "Playfair Display",
+  boxBgColor = "#585858",
+  boxOpacity = 0.5
+}) => {
   const { isAuthenticated, login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SectionData | null>(null);
@@ -46,6 +59,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState<string>("");
+  const [isPrivate, setIsPrivate] = useState<boolean>(false);
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -205,6 +219,12 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
               subtitle: updatedResult.subtitle,
               header_background_image: selectedImages.header_background_image?.startsWith('http') ? selectedImages.header_background_image : '',
               youtubeVideoCode,
+              isPrivate,
+              titleColor,
+              textColor,
+              fontFamily,
+              boxBgColor,
+              boxOpacity,
               content: {
                 title: updatedResult.title,
                 subtitle: updatedResult.subtitle,
@@ -257,15 +277,35 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
   };
 
   const handleButtonClick = async () => {
-    if (!isAuthenticated) {
-      await login();
-      return;
+    if (isAuthenticated) {
+      handleMakeVivid();
+    } else {
+      // If not authenticated, open login modal
+      login();
     }
-    handleMakeVivid();
   };
 
   return (
     <div className="vivid-generator">
+      <div className="privacy-toggle">
+        <label className="toggle-label">
+          <input
+            type="checkbox"
+            checked={isPrivate}
+            onChange={(e) => setIsPrivate(e.target.checked)}
+          />
+          <span className="toggle-switch"></span>
+          <span className="toggle-text">
+            {isPrivate ? "Private" : "Public"}
+          </span>
+        </label>
+        <span className="privacy-tooltip">
+          {isPrivate 
+            ? "Only you can see this essay in your profile" 
+            : "Your essay will be visible to everyone"}
+        </span>
+      </div>
+
       <div className="youtube-input-section">
         <input
           type="text"
@@ -287,20 +327,20 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({ title, content }) => {
 
       {error && <div className="error-message">{error}</div>}
 
-      {showImageSelectionFlow && (
+      {showImageSelectionFlow && result && (
         <ImageSelectionFlow
-          sections={result?.sections || []}
+          sections={result.sections}
           backgroundSuggestions={backgroundSuggestions}
           onImagesSelected={handleBackgroundImagesSelected}
-          onClose={handleCloseImageSelectionFlow}
+          onClose={() => setShowImageSelectionFlow(false)}
         />
       )}
 
-      {showSuccessModal && (
+      {showSuccessModal && essayViewUrl && (
         <SuccessModal
           isOpen={showSuccessModal}
-          essayViewUrl={essayViewUrl || ""}
           onClose={handleCloseSuccessModal}
+          essayViewUrl={essayViewUrl}
         />
       )}
     </div>
