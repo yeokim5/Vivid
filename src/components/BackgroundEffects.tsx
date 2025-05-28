@@ -29,16 +29,6 @@ const BackgroundEffects: React.FC<BackgroundEffectsProps> = ({
       previewComponent: <div className="preview-none">No Effect</div>
     },
     {
-      id: 'blob',
-      name: 'Blob Animation',
-      description: 'Colorful blob animation with glassmorphism effect',
-      previewComponent: <div className="preview-blob">
-        <div className="blob"></div>
-        <div className="blob" style={{top: '60%', left: '60%', animationDelay: '-3s', background: 'linear-gradient(45deg, #6e48aa, #9d50bb)'}}></div>
-        <div className="blob" style={{top: '40%', left: '75%', animationDelay: '-5s', background: 'linear-gradient(45deg, #00c9ff, #92fe9d)'}}></div>
-      </div>
-    },
-    {
       id: 'firefly',
       name: 'Firefly Particles',
       description: 'Light particles that resemble fireflies',
@@ -49,12 +39,6 @@ const BackgroundEffects: React.FC<BackgroundEffectsProps> = ({
       name: 'Floating Particles',
       description: 'Cool looking particles that float around',
       previewComponent: <div className="preview-particles">{Array(25).fill(0).map((_, i) => <div key={i} className="particle" style={{left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 5}s`}}></div>)}</div>
-    },
-    {
-      id: 'gradient',
-      name: 'Gradient Aurora',
-      description: 'Gradient aurora-like animation',
-      previewComponent: <div className="preview-gradient"><div className="gradient-bg"></div></div>
     }
   ];
 

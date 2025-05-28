@@ -415,4 +415,25 @@
   margin-left: 8px;
   color: #666;
   vertical-align: middle;
+}
+
+.essay-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.edit-essay-btn {
+  background-color: #5c7cfa;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.edit-essay-btn:hover {
+  background-color: #4c6ef5;
 } 

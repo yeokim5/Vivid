@@ -184,7 +184,7 @@ const Essays: React.FC = () => {
                 {essay.tags && essay.tags.length > 0 && (
                   <div className="essay-tags">
                     {essay.tags.map(tag => (
-                      <span key={tag} className="essay-tag">{tag}</span>
+                      <span key={`${essay._id}-${tag}`} className="essay-tag">{tag}</span>
                     ))}
                   </div>
                 )}

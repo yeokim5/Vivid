@@ -71,6 +71,7 @@
   height: 100%;
   z-index: -1;
   overflow: hidden;
+  pointer-events: none; /* Ensure it doesn't interfere with user interactions */
 }
 
 .background-canvas {
@@ -79,6 +80,7 @@
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: -1;
 }
 
 .background-particles {
@@ -87,6 +89,7 @@
   left: 0;
   width: 100%;
   height: 100%;
+  z-index: -1;
 }
 
 /* Preview styles */
@@ -128,52 +131,29 @@
 }
 
 .preview-firefly, .preview-particles {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  background-color: rgba(26, 28, 46, 0.9);
+  z-index: 0;
+  overflow: hidden;
 }
 
 .particle {
   position: absolute;
-  width: 5px;
-  height: 5px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: #fff;
   border-radius: 50%;
+  width: 3px;
+  height: 3px;
   animation: particleFloat 8s infinite ease-in-out;
 }
 
 .preview-firefly .particle {
-  width: 3px;
-  height: 3px;
-  background-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.5);
-  animation: fireflyFloat 4s infinite ease-in-out;
-}
-
-@keyframes particleFloat {
-  0% {
-    transform: translateY(0) scale(1);
-    opacity: 0.2;
-  }
-  50% {
-    transform: translateY(-50px) scale(1.2);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translateY(0) scale(1);
-    opacity: 0.2;
-  }
-}
-
-@keyframes fireflyFloat {
-  0%, 100% {
-    opacity: 0.1;
-    box-shadow: 0 0 5px 1px rgba(255, 255, 255, 0.2);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.7);
-  }
+  background-color: #ffbb00;
+  box-shadow: 0 0 10px 2px rgba(255, 187, 0, 0.6);
+  opacity: 0;
+  animation: fireflyGlow 3s infinite;
 }
 
 .preview-gradient {
@@ -273,5 +253,31 @@
   }
   100% {
     transform: translate(20px, 20px) rotate(360deg) scale(0.8);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-50px) scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.2;
+  }
+}
+
+@keyframes fireflyGlow {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
   }
 } 

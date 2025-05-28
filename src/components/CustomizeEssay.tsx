@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import '../styles/CustomizeEssay.css';
 
 interface CustomizeEssayProps {
@@ -55,35 +55,6 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
         >
           {/* Background effect preview */}
           <div className="preview-background-effect">
-            {selectedBackgroundEffect === 'blob' && (
-              <div className="preview-blob">
-                <div 
-                  className="blob"
-                  style={{
-                    top: '30%',
-                    left: '30%'
-                  }}
-                ></div>
-                <div 
-                  className="blob"
-                  style={{
-                    top: '60%',
-                    left: '60%',
-                    animationDelay: '-3s',
-                    background: 'linear-gradient(45deg, #6e48aa, #9d50bb)'
-                  }}
-                ></div>
-                <div 
-                  className="blob"
-                  style={{
-                    top: '40%',
-                    left: '75%',
-                    animationDelay: '-5s',
-                    background: 'linear-gradient(45deg, #00c9ff, #92fe9d)'
-                  }}
-                ></div>
-              </div>
-            )}
             {selectedBackgroundEffect === 'firefly' && (
               <div className="preview-firefly">
                 {Array(20).fill(0).map((_, i) => (
@@ -107,15 +78,10 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
                     className="particle"
                     style={{
                       left: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 5}s`
+                      animationDelay: `${Math.random() * 10}s`
                     }}
                   ></div>
                 ))}
-              </div>
-            )}
-            {selectedBackgroundEffect === 'gradient' && (
-              <div className="preview-gradient">
-                <div className="gradient-bg"></div>
               </div>
             )}
           </div>
@@ -145,7 +111,7 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
               }}
             >
               <p style={{ color: textColor }}>
-                This is how your essay text will appear.
+                This is how your text will appear.
               </p>
             </div>
           </div>
@@ -232,10 +198,8 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
             className="font-selector"
           >
             <option value="none">None</option>
-            <option value="blob">Blob Animation</option>
             <option value="firefly">Firefly Particles</option>
             <option value="particles">Floating Particles</option>
-            <option value="gradient">Gradient Aurora</option>
           </select>
         </div>
 
@@ -267,12 +231,12 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
         </div>
 
         <div className="styling-item">
-          <label>YouTube Video URL</label>
+          <label>Backgroun Music</label>
           <input
             type="text"
             value={youtubeUrl}
             onChange={(e) => setYoutubeUrl(e.target.value)}
-            placeholder="Paste YouTube video URL here..."
+            placeholder="(Optional) Paste YouTube video URL here..."
             className="youtube-input"
           />
         </div>

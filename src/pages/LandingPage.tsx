@@ -203,6 +203,30 @@ const LandingPage: React.FC = () => {
       }
     };
   }, [selectedFont]);
+  
+  // Effect to handle background effects
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.id = 'main-background-effect-style';
+    
+    // Remove any existing style first
+    const existingStyle = document.getElementById('main-background-effect-style');
+    if (existingStyle) {
+      document.head.removeChild(existingStyle);
+    }
+    
+    // Add the style to the document head if needed in the future
+    if (style.textContent) {
+      document.head.appendChild(style);
+    }
+    
+    return () => {
+      const styleToRemove = document.getElementById('main-background-effect-style');
+      if (styleToRemove) {
+        document.head.removeChild(styleToRemove);
+      }
+    };
+  }, [selectedBackgroundEffect]);
 
   return (
     <div className="landing-container">
@@ -210,21 +234,35 @@ const LandingPage: React.FC = () => {
 
       <div className="hero-section">
         <FluidBackground complexity={2} />
+        {/* Add the active background effect to the main app */}
+        {selectedBackgroundEffect !== 'none' && (
+          <BackgroundEffects selectedEffect={selectedBackgroundEffect} onSelectEffect={setSelectedBackgroundEffect} />
+        )}
         <div className="hero-content">
           <h1 style={{fontFamily: "Ariel"}}>Vivid</h1>
-          <h2>Transform Your Essay Into a Visual Experience</h2>
+          <h2>
+            Transform Your
+            <span className="rotating-words">
+              <span>Essay</span>
+              <span>Letter</span>
+              <span>Poem</span>
+              <span>Journal</span>
+              <span>Story</span>
+            </span>
+            Into a Visual Experience
+          </h2>
 
           <div className="essay-input-container">
             <input
               type="text"
               className="essay-title-input"
-              placeholder="Enter essay title..."
+              placeholder="Enter title..."
               value={essayTitle}
               onChange={handleTitleChange}
             />
             <textarea
               className={`essay-input ${isTyping ? "has-text" : ""}`}
-              placeholder="Paste your essay here (limited to 1000 words)..."
+              placeholder="(Optional) Paste your text here (limited to 1000 words)..."
               value={essayText}
               onChange={handleEssayChange}
             />
@@ -235,7 +273,7 @@ const LandingPage: React.FC = () => {
               className="customize-toggle-btn"
               onClick={toggleCustomizeSection}
             >
-              Customize Your Essay Appearance
+              Customize Your Appearance
               <span className="toggle-arrow">{showCustomize ? '▲' : '▼'}</span>
             </button>
 

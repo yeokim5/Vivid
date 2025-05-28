@@ -5,6 +5,7 @@ import "../styles/Essays.css";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import { useInView } from 'react-intersection-observer';
+import { EditEssayModal } from "../components/EditEssayModal";
 
 interface Essay {
   _id: string;
@@ -19,6 +20,13 @@ interface Essay {
     name?: string;
     _id?: string;
   };
+  titleColor?: string;
+  textColor?: string;
+  fontFamily?: string;
+  backgroundEffect?: string;
+  boxBgColor?: string;
+  boxOpacity?: number;
+  youtubeVideoCode?: string;
 }
 
 const UserEssays: React.FC = () => {
@@ -26,7 +34,9 @@ const UserEssays: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const { user, isAuthenticated } = useAuth();
+  const [selectedEssay, setSelectedEssay] = useState<Essay | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
   const navigate = useNavigate();
   
@@ -49,6 +59,8 @@ const UserEssays: React.FC = () => {
         },
       });
 
+      console.log('Raw essays data from API:', response.data.essays);
+      
       // Make sure we handle essays with missing data
       const processedEssays = response.data.essays.map((essay: any) => ({
         ...essay,
@@ -58,6 +70,8 @@ const UserEssays: React.FC = () => {
         author: essay.author || { name: user?.name || "Me" }
       }));
 
+      console.log('Processed essays data:', processedEssays);
+      
       setEssays(processedEssays);
       setLoading(false);
     } catch (err) {
@@ -70,12 +84,12 @@ const UserEssays: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserEssays();
-    } else {
+    } else if (!authLoading) {
       setLoading(false);
     }
-  }, [isAuthenticated, fetchUserEssays]);
+  }, [isAuthenticated, fetchUserEssays, authLoading]);
 
-  if (!isAuthenticated) {
+  if (!authLoading && !isAuthenticated) {
     return <Navigate to="/" />;
   }
 
@@ -95,6 +109,16 @@ const UserEssays: React.FC = () => {
 
   const handleEssayClick = (essayId: string) => {
     navigate(`/essay/${essayId}`);
+  };
+
+  const handleEditClick = (event: React.MouseEvent, essay: Essay) => {
+    event.stopPropagation(); // Prevent navigation to the essay view
+    setSelectedEssay(essay);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchUserEssays(); // Refresh essays after edit
   };
 
   if (loading) {
@@ -176,7 +200,7 @@ const UserEssays: React.FC = () => {
                         {essay.tags
                           .filter(tag => tag !== 'html-essay')
                           .map(tag => (
-                            <span key={tag} className="essay-tag">{tag}</span>
+                            <span key={`${essay._id}-${tag}`} className="essay-tag">{tag}</span>
                           ))}
                       </div>
                     )}
@@ -194,6 +218,15 @@ const UserEssays: React.FC = () => {
                       </div>
                       <span className="essay-views">{essay.views} views</span>
                     </div>
+                    <div className="essay-actions">
+                      <button 
+                        className="edit-essay-btn"
+                        onClick={(e) => handleEditClick(e, essay)}
+                        title="Edit essay"
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -206,6 +239,14 @@ const UserEssays: React.FC = () => {
           </div>
         </>
       )}
+
+      {/* Edit Essay Modal */}
+      <EditEssayModal
+        essay={selectedEssay}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={handleEditSuccess}
+      />
     </div>
   );
 };
