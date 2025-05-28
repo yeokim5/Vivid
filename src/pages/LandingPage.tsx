@@ -234,8 +234,8 @@ const LandingPage: React.FC = () => {
 
       <div className="hero-section">
         <FluidBackground complexity={2} />
-        {/* Add the active background effect to the main app */}
-        {selectedBackgroundEffect !== 'none' && (
+        {/* Add the active background effect to the main app, but not for heart effect */}
+        {selectedBackgroundEffect !== 'none' && selectedBackgroundEffect !== 'heart' && (
           <BackgroundEffects selectedEffect={selectedBackgroundEffect} onSelectEffect={setSelectedBackgroundEffect} />
         )}
         <div className="hero-content">
@@ -262,7 +262,7 @@ const LandingPage: React.FC = () => {
             />
             <textarea
               className={`essay-input ${isTyping ? "has-text" : ""}`}
-              placeholder="(Optional) Paste your text here (limited to 1000 words)..."
+              placeholder="Paste your text here (limited to 1000 words)..."
               value={essayText}
               onChange={handleEssayChange}
             />

@@ -29,6 +29,12 @@ const BackgroundEffects: React.FC<BackgroundEffectsProps> = ({
       previewComponent: <div className="preview-none">No Effect</div>
     },
     {
+      id: 'heart',
+      name: 'Heart Effect',
+      description: 'Falling hearts that create a romantic atmosphere',
+      previewComponent: <div className="preview-heart">{Array(5).fill(0).map((_, i) => <div key={i} className="heart" style={{left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 2}s`}} dangerouslySetInnerHTML={{__html: '💗'}}></div>)}</div>
+    },
+    {
       id: 'firefly',
       name: 'Firefly Particles',
       description: 'Light particles that resemble fireflies',
@@ -200,6 +206,40 @@ const BackgroundEffects: React.FC<BackgroundEffectsProps> = ({
 
   // DOM-based animations
   useEffect(() => {
+    if (selectedEffect === 'heart' && particlesRef.current) {
+      const container = particlesRef.current;
+      container.innerHTML = '';
+      
+      // Heart creation function
+      const createHeart = () => {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        
+        heart.style.left = Math.random() * 100 + "vw";
+        heart.style.animationDuration = Math.random() * 2 + 3 + "s";
+        heart.innerHTML = '💗';
+        
+        container.appendChild(heart);
+        
+        // Remove heart after animation completes
+        setTimeout(() => {
+          heart.remove();
+        }, 5000);
+      };
+      
+      // Initial hearts
+      for (let i = 0; i < 10; i++) {
+        setTimeout(() => createHeart(), Math.random() * 1500);
+      }
+      
+      // Set interval to create hearts continuously
+      const heartInterval = setInterval(createHeart, 300);
+      
+      return () => {
+        clearInterval(heartInterval);
+      };
+    }
+    
     if (selectedEffect === 'bubbles' && particlesRef.current) {
       const container = particlesRef.current;
       container.innerHTML = '';
@@ -272,6 +312,7 @@ const BackgroundEffects: React.FC<BackgroundEffectsProps> = ({
         return <canvas ref={canvasRef} className="background-canvas"></canvas>;
       case 'bubbles':
       case 'geometric':
+      case 'heart':
         return <div ref={particlesRef} className="background-particles"></div>;
       default:
         return null;

@@ -280,4 +280,52 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Heart effect */
+.heart {
+  position: fixed;
+  font-size: 1.5rem;
+  top: -1vh;
+  transform: translateY(0);
+  animation: fall 3s linear forwards;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@keyframes fall {
+  from {
+    transform: translateY(0vh) translateX(-10vw); 
+  }
+  to {
+    transform: translateY(105vh) translateX(10vw); 
+  }
+}
+
+.preview-heart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.preview-heart .heart {
+  position: absolute;
+  font-size: 1.5rem;
+  top: -1vh;
+  transform: translateY(0);
+  animation: previewFall 3s linear forwards;
+  z-index: 5;
+}
+
+@keyframes previewFall {
+  from {
+    transform: translateY(0vh) translateX(-10vw); 
+  }
+  to {
+    transform: translateY(105vh) translateX(10vw); 
+  }
 } 

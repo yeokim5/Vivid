@@ -40,6 +40,106 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
   setYoutubeUrl,
   fontOptions
 }) => {
+  const heartContainerRef = useRef<HTMLDivElement>(null);
+  const fireflyContainerRef = useRef<HTMLDivElement>(null);
+  const particlesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Effect to handle heart animation in the preview
+  useEffect(() => {
+    if (selectedBackgroundEffect === 'heart' && heartContainerRef.current) {
+      const container = heartContainerRef.current;
+      container.innerHTML = ''; // Clear existing hearts
+      
+      // Heart creation function
+      const createHeart = () => {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        
+        heart.style.left = Math.random() * 100 + "%";
+        heart.style.animationDuration = Math.random() * 2 + 3 + "s";
+        heart.innerHTML = '💗';
+        
+        container.appendChild(heart);
+        
+        // Remove heart after animation completes (5 seconds)
+        setTimeout(() => {
+          heart.remove();
+        }, 5000);
+      };
+      
+      // Create a few initial hearts
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => createHeart(), Math.random() * 1000);
+      }
+      
+      // Create hearts continuously, just like in the actual essay
+      const heartInterval = setInterval(createHeart, 300);
+      
+      // Clean up interval when component unmounts or effect changes
+      return () => {
+        clearInterval(heartInterval);
+      };
+    }
+    
+    if (selectedBackgroundEffect === 'firefly' && fireflyContainerRef.current) {
+      const container = fireflyContainerRef.current;
+      container.innerHTML = ''; // Clear existing fireflies
+      
+      // Create simplified fireflies for the preview - matching template.html
+      for (let i = 0; i < 5; i++) {
+        const firefly = document.createElement('div');
+        firefly.classList.add('firefly');
+        
+        // Position in center with proper margin and transform origin
+        firefly.style.left = '50%';
+        firefly.style.top = '50%';
+        firefly.style.margin = '-0.2vw 0 0 9.8vw';
+        
+        // Add custom animation name
+        const rotationSpeed = Math.floor(Math.random() * 10) + 8;
+        const flashDuration = Math.floor(Math.random() * 3000) + 2000;
+        const flashDelay = Math.floor(Math.random() * 2000) + 500;
+        
+        // Add custom properties for pseudo-elements
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+          .firefly:nth-child(${i+1})::before {
+            animation-duration: ${rotationSpeed}s;
+          }
+          .firefly:nth-child(${i+1})::after {
+            animation-duration: ${rotationSpeed}s, ${flashDuration}ms;
+            animation-delay: 0ms, ${flashDelay}ms;
+          }
+        `;
+        
+        firefly.appendChild(styleElement);
+        container.appendChild(firefly);
+      }
+    }
+    
+    if (selectedBackgroundEffect === 'particles' && particlesContainerRef.current) {
+      const container = particlesContainerRef.current;
+      container.innerHTML = ''; // Clear existing particles
+      
+      // Create particles for the preview
+      for (let i = 0; i < 25; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Position at the bottom
+        const left = Math.random() * 100;
+        particle.style.left = `${left}%`;
+        particle.style.bottom = '-20px';
+        
+        // Add random delay to make movement more natural
+        const delay = Math.random() * 20;
+        particle.style.animationDelay = `${delay}s`;
+        
+        container.appendChild(particle);
+      }
+    }
+  }, [selectedBackgroundEffect]);
+
   return (
     <div className="customize-essay-container">
       <div className="style-preview">
@@ -55,34 +155,14 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
         >
           {/* Background effect preview */}
           <div className="preview-background-effect">
+            {selectedBackgroundEffect === 'heart' && (
+              <div className="preview-heart" ref={heartContainerRef}></div>
+            )}
             {selectedBackgroundEffect === 'firefly' && (
-              <div className="preview-firefly">
-                {Array(20).fill(0).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="particle"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 3}s`
-                    }}
-                  ></div>
-                ))}
-              </div>
+              <div className="preview-firefly" ref={fireflyContainerRef}></div>
             )}
             {selectedBackgroundEffect === 'particles' && (
-              <div className="preview-particles">
-                {Array(25).fill(0).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="particle"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      animationDelay: `${Math.random() * 10}s`
-                    }}
-                  ></div>
-                ))}
-              </div>
+              <div className="preview-particles" ref={particlesContainerRef}></div>
             )}
           </div>
           
@@ -198,6 +278,7 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
             className="font-selector"
           >
             <option value="none">None</option>
+            <option value="heart">Heart Effect</option>
             <option value="firefly">Firefly Particles</option>
             <option value="particles">Floating Particles</option>
           </select>
@@ -231,7 +312,7 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
         </div>
 
         <div className="styling-item">
-          <label>Backgroun Music</label>
+          <label>Background Music</label>
           <input
             type="text"
             value={youtubeUrl}
