@@ -278,9 +278,9 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
             className="font-selector"
           >
             <option value="none">None</option>
-            <option value="heart">Heart Effect</option>
             <option value="firefly">Firefly Particles</option>
             <option value="particles">Floating Particles</option>
+            <option value="heart">Heart Effect</option>
           </select>
         </div>
 
