@@ -1,24 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 interface ModalPortalProps {
   children: React.ReactNode;
 }
 
 const ModalPortal: React.FC<ModalPortalProps> = ({ children }) => {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
-
-  if (!mounted) return null;
-
-  return createPortal(
-    children,
-    document.body
-  );
+  const modalRoot = document.getElementById('modal-root') || document.body;
+  return ReactDOM.createPortal(children, modalRoot);
 };
 
 export default ModalPortal; 

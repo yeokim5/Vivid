@@ -9,8 +9,7 @@
       name="description"
       content="Vivid - Your AI-powered essay writing assistant"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="manifest" href="./manifest.json" />
     <link href="https://fonts.googleapis.com/css2?family=Cutive+Mono&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&display=swap" rel="stylesheet">
     <title>Vivid</title>
@@ -18,6 +17,8 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- Modal portal root for rendering modals outside of component hierarchy -->
+    <div id="modal-root"></div>
+    <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

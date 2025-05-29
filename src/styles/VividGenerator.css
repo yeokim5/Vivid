@@ -70,15 +70,37 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-top: 15px;
+}
+
 .error-message {
   color: #e74c3c;
-  background-color: rgba(231, 76, 60, 0.1);
-  padding: 10px 15px;
-  border-radius: 5px;
-  margin: 15px auto;
+  font-size: 0.95rem;
   text-align: center;
-  max-width: 500px;
-  border-left: 4px solid #e74c3c;
+  max-width: 400px;
+}
+
+.get-credits-btn {
+  background: linear-gradient(135deg, #5d5fe2, #9867f0);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(93, 95, 226, 0.25);
+}
+
+.get-credits-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(93, 95, 226, 0.35);
 }
 
 .vivid-result {

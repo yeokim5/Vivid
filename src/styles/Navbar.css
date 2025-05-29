@@ -386,6 +386,23 @@
   .profile-menu-item:hover, .logout-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
+
+  .credits-display {
+    padding: 12px 15px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-left: 3px solid rgba(66, 133, 244, 0.8);
+    color: white;
+  }
+  
+  .credit-amount {
+    color: white;
+  }
+  
+  .buy-credits-btn {
+    max-width: 150px;
+    padding: 8px 15px;
+    margin-top: 10px;
+  }
 }
 
 /* Ensure the Profile button matches the Explore link */
@@ -406,4 +423,40 @@
 
 .profile-nav-link:hover::after {
   width: 70% !important;
+}
+
+.credits-display {
+  font-weight: bold;
+  background-color: #f0f0f0;
+  color: #333;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-left: 3px solid #4285f4;
+}
+
+.buy-credits-btn {
+  background: linear-gradient(135deg, #5d5fe2, #9867f0);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 15px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 10px rgba(93, 95, 226, 0.25);
+  margin-top: 5px;
+  width: 100%;
+  max-width: 120px;
+}
+
+.buy-credits-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(93, 95, 226, 0.35);
 }

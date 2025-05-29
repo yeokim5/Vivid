@@ -436,4 +436,49 @@
 
 .edit-essay-btn:hover {
   background-color: #4c6ef5;
+}
+
+.user-credits-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.user-credits {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: inline-block;
+}
+
+.user-credits p {
+  margin: 0;
+  font-weight: 500;
+  color: #333;
+}
+
+.credit-count {
+  font-weight: 700;
+  color: #4285f4;
+  margin-left: 5px;
+}
+
+.buy-credits-btn {
+  background: linear-gradient(135deg, #5d5fe2, #9867f0);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(93, 95, 226, 0.25);
+}
+
+.buy-credits-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(93, 95, 226, 0.35);
 } 

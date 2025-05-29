@@ -6,6 +6,8 @@ import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
 import { useInView } from 'react-intersection-observer';
 import { EditEssayModal } from "../components/EditEssayModal";
+import PurchaseCreditsModal from "../components/PurchaseCreditsModal";
+import ModalPortal from "../components/ModalPortal";
 
 interface Essay {
   _id: string;
@@ -36,6 +38,7 @@ const UserEssays: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedEssay, setSelectedEssay] = useState<Essay | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
   const navigate = useNavigate();
@@ -140,6 +143,18 @@ const UserEssays: React.FC = () => {
       <div className="essays-hero">
         <h1>My Essays</h1>
         <p className="hero-subtitle">Manage and view all your created essays</p>
+        
+        <div className="user-credits-container">
+          <div className="user-credits">
+            <p>Credits: <span className="credit-count">{user?.credits || 0}</span></p>
+          </div>
+          <button 
+            className="buy-credits-btn"
+            onClick={() => setShowPurchaseModal(true)}
+          >
+            Buy Credits
+          </button>
+        </div>
         
         <div className="search-bar">
           <input
@@ -247,6 +262,17 @@ const UserEssays: React.FC = () => {
         onClose={() => setIsEditModalOpen(false)}
         onSuccess={handleEditSuccess}
       />
+      
+      {/* Purchase Credits Modal */}
+      {showPurchaseModal && user && (
+        <ModalPortal>
+          <PurchaseCreditsModal
+            isOpen={showPurchaseModal}
+            onClose={() => setShowPurchaseModal(false)}
+            currentCredits={user.credits}
+          />
+        </ModalPortal>
+      )}
     </div>
   );
 };

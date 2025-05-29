@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import "../styles/VividGenerator.css";
 import ImageSelectionFlow from "./ImageSelectionFlow";
 import SuccessModal from "./SuccessModal";
+import PurchaseCreditsModal from "./PurchaseCreditsModal";
+import ModalPortal from "./ModalPortal";
 import { useAuth } from "../context/AuthContext";
 
 interface VividGeneratorProps {
@@ -54,7 +56,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   onPrivacyChange,
   onYoutubeUrlChange
 }) => {
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, login, user, updateUserCredits } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SectionData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +70,8 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   const [essayCreated, setEssayCreated] = useState(false);
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -112,8 +116,15 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
     setError(null);
 
     // Check if user is authenticated
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       setError("Please sign in to use the Make it Vivid feature");
+      return;
+    }
+
+    // Check if user has credits
+    if (user.credits <= 0) {
+      // Instead of showing the purchase modal directly, show an error with a Get Credits button
+      setError("You don't have enough credits to use this feature");
       return;
     }
 
@@ -124,9 +135,39 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
     setIsLoading(true);
 
+    // Use a credit
     try {
+      const authToken = localStorage.getItem("auth_token");
+      if (!authToken) {
+        throw new Error("Not authenticated. Please log in.");
+      }
+
+      const creditResponse = await fetch(`${API_URL}/credits/use`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`
+        }
+      });
+
+      if (!creditResponse.ok) {
+        const errorData = await creditResponse.json().catch(() => null);
+        throw new Error(
+          errorData?.message || `Credit error: ${creditResponse.status} ${creditResponse.statusText}`
+        );
+      }
+
+      const creditData = await creditResponse.json();
+      if (!creditData.success) {
+        throw new Error(creditData.message || "Failed to use credit");
+      }
+
+      // Update user credits in context
+      updateUserCredits(creditData.credits);
+
+      // Continue with vivid generation
       const response = await fetch(
-        "http://localhost:5000/api/sections/divide",
+        `${API_URL}/sections/divide`,
         {
           method: "POST",
           headers: {
@@ -305,7 +346,19 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         {isLoading ? "Processing..." : "Make it Vivid"}
       </button>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="error-container">
+          <div className="error-message">{error}</div>
+          {error.includes("enough credits") && user && (
+            <button 
+              className="get-credits-btn"
+              onClick={() => setShowPurchaseModal(true)}
+            >
+              Get Credits
+            </button>
+          )}
+        </div>
+      )}
 
       {showImageSelectionFlow && result && (
         <ImageSelectionFlow
@@ -322,6 +375,16 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
           onClose={handleCloseSuccessModal}
           essayViewUrl={essayViewUrl}
         />
+      )}
+      
+      {showPurchaseModal && user && (
+        <ModalPortal>
+          <PurchaseCreditsModal
+            isOpen={showPurchaseModal}
+            onClose={() => setShowPurchaseModal(false)}
+            currentCredits={user.credits}
+          />
+        </ModalPortal>
       )}
     </div>
   );

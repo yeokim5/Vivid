@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import ViewEssay from "./pages/ViewEssay";
 import Essays from "./pages/Essays";
 import UserEssays from "./pages/UserEssays";
+import StripeProvider from "./components/StripeProvider";
 import "./styles/App.css";
 
 const App: React.FC = () => {
@@ -16,22 +17,24 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      <div className="App">
-        <Routes location={location}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/essays" element={<Essays />} />
-          <Route path="/my-essays" element={<UserEssays />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/essay/:id" element={<ViewEssay />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        {!isEssayView && (
-          <footer>
-            <p>&copy; {new Date().getFullYear()} Vivid</p>
-          </footer>
-        )}
-      </div>
+      <StripeProvider>
+        <div className="App">
+          <Routes location={location}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/essays" element={<Essays />} />
+            <Route path="/my-essays" element={<UserEssays />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/essay/:id" element={<ViewEssay />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          {!isEssayView && (
+            <footer>
+              <p>&copy; {new Date().getFullYear()} Vivid</p>
+            </footer>
+          )}
+        </div>
+      </StripeProvider>
     </AuthProvider>
   );
 };

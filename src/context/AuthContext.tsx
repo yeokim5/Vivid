@@ -14,6 +14,7 @@ interface User {
   name: string;
   email: string;
   profilePicture?: string;
+  credits: number;
 }
 
 interface AuthContextType {
@@ -23,6 +24,7 @@ interface AuthContextType {
   login: () => void;
   logout: () => void;
   isAuthenticated: boolean;
+  updateUserCredits: (credits: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -195,6 +197,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Function to update user credits
+  const updateUserCredits = (credits: number) => {
+    if (user) {
+      setUser({
+        ...user,
+        credits
+      });
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -202,6 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     login,
     logout,
     isAuthenticated: !!user,
+    updateUserCredits
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
