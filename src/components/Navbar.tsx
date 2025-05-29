@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Navbar.css";
 import { useAuth } from "../context/AuthContext";
@@ -12,37 +12,58 @@ const Navbar: React.FC = () => {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const { user, isAuthenticated, login, logout } = useAuth();
 
+  // Debounced scroll handler for better performance
   useEffect(() => {
+    let scrollTimer: number | null = null;
+    
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
+      if (scrollTimer !== null) {
+        window.cancelAnimationFrame(scrollTimer);
       }
+      
+      scrollTimer = window.requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 50);
+      });
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      if (scrollTimer !== null) {
+        window.cancelAnimationFrame(scrollTimer);
+      }
     };
   }, []);
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
-  };
+  // Use memoized toggle handler
+  const toggleMenu = useCallback(() => {
+    setMenuOpen(prev => !prev);
+    
+    // Prevent body scrolling when menu is open
+    if (!menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }, [menuOpen]);
 
-  const handleAuthAction = () => {
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+    document.body.style.overflow = '';
+  }, []);
+
+  const handleAuthAction = useCallback(() => {
     if (isAuthenticated) {
       logout();
     } else {
       login();
     }
-  };
+  }, [isAuthenticated, login, logout]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     setShowLogoutMenu(false);
-  };
+  }, [logout]);
 
   return (
     <>
@@ -66,7 +87,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/essays"
                 className="nav-link"
-                onClick={() => setMenuOpen(false)}
+                onClick={closeMenu}
               >
                 Explore
               </Link>
@@ -112,7 +133,7 @@ const Navbar: React.FC = () => {
                 <button
                   className="nav-link nav-btn-google"
                   onClick={() => {
-                    setMenuOpen(false);
+                    closeMenu();
                     handleAuthAction();
                   }}
                 >

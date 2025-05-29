@@ -22,9 +22,11 @@
   left: 0;
   right: 0;
   z-index: 999;
-  transition: all 0.4s ease;
+  transition: background-color 0.4s ease;
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+  will-change: background-color;
 }
 
 .navbar.scrolled {
@@ -164,6 +166,7 @@
   height: 21px;
   cursor: pointer;
   z-index: 10;
+  will-change: transform;
 }
 
 .menu-icon span {
@@ -172,7 +175,10 @@
   width: 100%;
   background-color: var(--white);
   border-radius: 3px;
-  transition: all 0.3s linear;
+  transition: transform 0.25s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.2s ease;
+  will-change: transform, opacity;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Google Sign-in Button Styles */
@@ -303,15 +309,23 @@
     left: -100%;
     opacity: 0;
     padding: 100px 0;
-    transition: all 0.5s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    transform: translateX(-100%);
+    will-change: transform, opacity;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
   }
 
   .nav-menu.active {
     background: linear-gradient(135deg, rgba(26, 28, 46, 0.98), rgba(45, 47, 105, 0.98));
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     left: 0;
     opacity: 1;
-    transition: all 0.5s ease;
+    transform: translateX(0);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
   }
 
   .nav-item {
@@ -350,6 +364,7 @@
 
   .menu-icon.active span:nth-child(2) {
     opacity: 0;
+    transform: translateX(-10px);
   }
 
   .menu-icon.active span:nth-child(3) {
@@ -375,6 +390,12 @@
     width: 80%;
     margin: 0 auto;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    will-change: transform, opacity;
+    transform-origin: top center;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
   }
 
   .profile-menu-item, .logout-button {
