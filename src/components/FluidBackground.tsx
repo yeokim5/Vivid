@@ -11,6 +11,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
   const displacementRef = useRef<SVGFEDisplacementMapElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [baseFrequency, setBaseFrequency] = useState(0.01);
   const [scale, setScale] = useState(300);
   const [isMobile, setIsMobile] = useState(false);
@@ -66,6 +67,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
     };
   }, [isMobile]);
   
+  // Set up canvas and resize observer
   useEffect(() => {
     if (sliderRef.current && turbulenceRef.current) {
       // Reduce complexity on mobile devices
@@ -78,8 +80,33 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
     const canvas = canvasRef.current;
     if (canvas && containerRef.current) {
       // Match canvas dimensions to container
-      canvas.width = containerRef.current.offsetWidth;
-      canvas.height = containerRef.current.offsetHeight;
+      const updateCanvasSize = () => {
+        if (canvas && containerRef.current) {
+          canvas.width = containerRef.current.offsetWidth;
+          canvas.height = containerRef.current.offsetHeight;
+        }
+      };
+      
+      // Initial size
+      updateCanvasSize();
+      
+      // Create resize observer with debounce to prevent loop
+      if (!resizeObserverRef.current) {
+        let resizeTimeout: number | null = null;
+        
+        resizeObserverRef.current = new ResizeObserver((entries) => {
+          // Debounce resize events
+          if (resizeTimeout) {
+            window.clearTimeout(resizeTimeout);
+          }
+          
+          resizeTimeout = window.setTimeout(() => {
+            updateCanvasSize();
+          }, 100);
+        });
+        
+        resizeObserverRef.current.observe(containerRef.current);
+      }
       
       // Get canvas context
       const ctx = canvas.getContext('2d');
@@ -87,21 +114,19 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
         // Create background pattern
         const img = new Image();
         img.onload = () => {
-          // Ensure the canvas is always updated with the container size
-          const resizeObserver = new ResizeObserver(() => {
-            if (canvas && containerRef.current) {
-              canvas.width = containerRef.current.offsetWidth;
-              canvas.height = containerRef.current.offsetHeight;
-            }
-          });
-          
-          if (containerRef.current) {
-            resizeObserver.observe(containerRef.current);
-          }
+          // Pattern setup code goes here if needed
         };
         img.src = getComputedStyle(document.documentElement).getPropertyValue('--bg-image').replace(/url\(['"]?([^'"]*)['"]?\)/i, '$1').trim();
       }
     }
+    
+    // Cleanup function
+    return () => {
+      if (resizeObserverRef.current && containerRef.current) {
+        resizeObserverRef.current.disconnect();
+        resizeObserverRef.current = null;
+      }
+    };
   }, [complexity, isMobile]);
   
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {

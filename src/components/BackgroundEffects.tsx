@@ -57,12 +57,20 @@ const BackgroundEffects: React.FC<BackgroundEffectsProps> = ({
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Set canvas size
+      // Set canvas size with debounce to prevent potential resize loops
+      let resizeTimeout: number | null = null;
+      
       const resizeCanvas = () => {
-        if (canvas) {
-          canvas.width = window.innerWidth;
-          canvas.height = window.innerHeight;
+        if (resizeTimeout) {
+          window.clearTimeout(resizeTimeout);
         }
+        
+        resizeTimeout = window.setTimeout(() => {
+          if (canvas) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+          }
+        }, 100);
       };
 
       resizeCanvas();
