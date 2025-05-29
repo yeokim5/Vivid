@@ -13,8 +13,22 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
   const containerRef = useRef<HTMLDivElement>(null);
   const [baseFrequency, setBaseFrequency] = useState(0.01);
   const [scale, setScale] = useState(300);
+  const [isMobile, setIsMobile] = useState(false);
   
-  // Animate the SVG filter properties
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const width = window.innerWidth;
+      const isMobileDevice = width <= 768;
+      setIsMobile(isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // Animate the SVG filter properties with performance optimization for mobile
   useEffect(() => {
     let animationFrameId: number;
     let startTime = Date.now();
@@ -23,12 +37,23 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
       const currentTime = Date.now();
       const elapsed = (currentTime - startTime) / 1000; // time in seconds
       
-      // Animate baseFrequency with a subtle sine wave
-      const newBaseFrequency = 0.01 + Math.sin(elapsed * 0.2) * 0.005;
+      // Less frequent updates for mobile devices
+      const updateFrequency = isMobile ? 100 : 1; // Only update every 100ms on mobile
+      
+      if (isMobile && currentTime % updateFrequency !== 0) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+      
+      // Reduced animation intensity for mobile
+      const intensityFactor = isMobile ? 0.3 : 1;
+      
+      // Animate baseFrequency with a subtle sine wave - reduced for mobile
+      const newBaseFrequency = 0.01 + Math.sin(elapsed * 0.2) * 0.005 * intensityFactor;
       setBaseFrequency(newBaseFrequency);
       
-      // Animate scale with a different frequency
-      const newScale = 300 + Math.sin(elapsed * 0.1) * 20;
+      // Animate scale with a different frequency - reduced for mobile
+      const newScale = 300 + Math.sin(elapsed * 0.1) * 20 * intensityFactor;
       setScale(newScale);
       
       animationFrameId = requestAnimationFrame(animate);
@@ -39,12 +64,14 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [isMobile]);
   
   useEffect(() => {
     if (sliderRef.current && turbulenceRef.current) {
-      sliderRef.current.value = complexity.toString();
-      turbulenceRef.current.setAttribute('numOctaves', complexity.toString());
+      // Reduce complexity on mobile devices
+      const actualComplexity = isMobile ? Math.min(complexity, 2) : complexity;
+      sliderRef.current.value = actualComplexity.toString();
+      turbulenceRef.current.setAttribute('numOctaves', actualComplexity.toString());
     }
     
     // Initialize canvas and create fluid background effect
@@ -75,7 +102,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
         img.src = getComputedStyle(document.documentElement).getPropertyValue('--bg-image').replace(/url\(['"]?([^'"]*)['"]?\)/i, '$1').trim();
       }
     }
-  }, [complexity]);
+  }, [complexity, isMobile]);
   
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -102,7 +129,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
 
       {/* The background itself */}
       <div id="container" ref={containerRef}>
-        <canvas ref={canvasRef}></canvas>
+        <canvas ref={canvasRef} className={isMobile ? "mobile-optimization" : ""}></canvas>
       </div>
 
       {/* svg magic that makes this happen */}
@@ -111,7 +138,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({ complexity = 1 }) => 
           <feTurbulence
             ref={turbulenceRef}
             baseFrequency={baseFrequency}
-            numOctaves={complexity}
+            numOctaves={isMobile ? Math.min(complexity, 2) : complexity}
             result="wrap"
             type="fractalNoise">
           </feTurbulence>

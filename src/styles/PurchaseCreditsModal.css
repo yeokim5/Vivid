@@ -290,6 +290,60 @@
   .credits-modal {
     padding: 20px;
     width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: auto;
+    position: relative;
+    top: 0;
+    transform: translateY(0);
+  }
+  
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 20px 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  
+  .credits-modal h2 {
+    font-size: 1.8rem;
+  }
+  
+  .credits-subtitle {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .credits-promo-message {
+    font-size: 1rem;
+    padding: 10px;
+  }
+  
+  .single-package {
+    padding: 15px;
+  }
+  
+  .single-package:before {
+    font-size: 0.8rem;
+    top: -10px;
+  }
+  
+  .package-content h3 {
+    font-size: 1.6rem;
+  }
+  
+  .current-credits {
+    padding: 10px;
+    font-size: 1rem;
+  }
+  
+  .purchase-button {
+    padding: 12px;
+    font-size: 1rem;
+  }
+  
+  .terms-note {
+    font-size: 0.8rem;
   }
   
   .package-options {
