@@ -31,6 +31,7 @@ const StripeProvider: React.FC<StripeProviderProps> = ({ children }) => {
     // This helps with iframe communication
     clientSecret: undefined,
     loader: 'auto' as const,
+    locale: 'en' as const, // Force English language for all Stripe elements
   };
 
   if (loading) {
