@@ -64,6 +64,7 @@ const LandingPage: React.FC = () => {
   const [isPrivate, setIsPrivate] = useState(false); // Add privacy state
   const [youtubeUrl, setYoutubeUrl] = useState(""); // Add YouTube URL state
   const [showCustomize, setShowCustomize] = useState(false); // State to toggle customize section
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,7 +76,7 @@ const LandingPage: React.FC = () => {
     // Fetch popular essays
     const fetchPopularEssays = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/essays?sortBy=popular&limit=3");
+        const response = await fetch(`${API_URL}/essays?sortBy=popular&limit=3`);
         if (!response.ok) {
           throw new Error("Failed to fetch essays");
         }
@@ -89,7 +90,7 @@ const LandingPage: React.FC = () => {
 
     fetchPopularEssays();
     return () => clearTimeout(timer);
-  }, []);
+  }, [API_URL]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEssayTitle(e.target.value);

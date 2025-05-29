@@ -27,6 +27,7 @@ const Essays: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -34,7 +35,7 @@ const Essays: React.FC = () => {
 
   const fetchEssays = useCallback(async (page: number) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/essays?page=${page}&limit=10&sortBy=${sortBy}`);
+      const response = await fetch(`${API_URL}/essays?page=${page}&limit=10&sortBy=${sortBy}`);
       if (!response.ok) {
         throw new Error("Failed to fetch essays");
       }
@@ -54,7 +55,7 @@ const Essays: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [sortBy]);
+  }, [sortBy, API_URL]);
 
   useEffect(() => {
     setEssays([]);

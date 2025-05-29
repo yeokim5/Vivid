@@ -29,12 +29,13 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [loadingSectionRetry, setLoadingSectionRetry] = useState<boolean>(false);
   const [queuedSections, setQueuedSections] = useState<string[]>([]);
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
   // Cleanup function to call backend cleanup endpoint
   const cleanup = async () => {
     // Call backend cleanup endpoint
     try {
-      await fetch("http://localhost:5000/api/images/cleanup", {
+      await fetch(`${API_URL}/images/cleanup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +93,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     }));
 
     try {
-      const response = await fetch("http://localhost:5000/api/images", {
+      const response = await fetch(`${API_URL}/images`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +145,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     setLoadingSectionRetry(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/images", {
+      const response = await fetch(`${API_URL}/images`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

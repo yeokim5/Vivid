@@ -256,7 +256,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
         // Create the essay with HTML content
         const response = await fetch(
-          "http://localhost:5000/api/essays/html",
+          `${API_URL}/essays/html`,
           {
             method: "POST",
             headers: {
