@@ -1,16 +1,55 @@
+/* Global styles to hide scrollbars but keep scrolling */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  /* Hide scrollbar but keep scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 .view-essay-container {
   min-height: 100vh;
   background-color: #0a0a0a;
   color: #f8f9fa;
+  /* Hide scrollbar but keep scrolling */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  &::-webkit-scrollbar {
-    display: none;
-  }
+.view-essay-container::-webkit-scrollbar {
+  display: none;
+}
 
-  /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+/* Hide scrollbar for the iframe content */
+.view-essay-container iframe {
+  /* Hide scrollbar but keep scrolling */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.view-essay-container iframe::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure iframe content can scroll but hides scrollbar */
+.view-essay-container iframe body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  /* Hide scrollbar but keep scrolling */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.view-essay-container iframe body::-webkit-scrollbar {
+  display: none;
 }
 
 .loading {
@@ -103,16 +142,4 @@
 .credits:hover {
   background: rgba(0, 0, 0, 0.9);
   color: #fff;
-}
-
-/* Hide scrollbar for the iframe content */
-.view-essay-container iframe {
-  /* Hide scrollbar for Chrome, Safari and Opera */
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Hide scrollbar for IE, Edge and Firefox */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
 } 
