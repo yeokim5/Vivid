@@ -1,4 +1,3 @@
-// Loading animation
 setTimeout(() => {
   const loading = document.querySelector(".loading");
   loading.classList.add("fade-out");
