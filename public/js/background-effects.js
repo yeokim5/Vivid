@@ -2,7 +2,13 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Wait for the page to finish loading
   window.addEventListener('load', function() {
-    initBackgroundEffect(backgroundEffect);
+    // Use the global backgroundEffect variable
+    if (typeof window.backgroundEffect !== 'undefined') {
+      initBackgroundEffect(window.backgroundEffect);
+    } else {
+      console.warn('Background effect not defined, defaulting to none');
+      initBackgroundEffect('none');
+    }
   });
 });
 
