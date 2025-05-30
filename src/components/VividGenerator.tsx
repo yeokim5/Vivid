@@ -112,10 +112,6 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   };
 
   const handleMakeVivid = async () => {
-    // Clear previous errors
-    setError(null);
-
-    // Check if user is authenticated
     if (!isAuthenticated || !user) {
       setError("Please sign in to use the Make it Vivid feature");
       return;
@@ -135,36 +131,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
     setIsLoading(true);
 
-    // Use a credit
     try {
-      const authToken = localStorage.getItem("auth_token");
-      if (!authToken) {
-        throw new Error("Not authenticated. Please log in.");
-      }
-
-      const creditResponse = await fetch(`${API_URL}/credits/use`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${authToken}`
-        }
-      });
-
-      if (!creditResponse.ok) {
-        const errorData = await creditResponse.json().catch(() => null);
-        throw new Error(
-          errorData?.message || `Credit error: ${creditResponse.status} ${creditResponse.statusText}`
-        );
-      }
-
-      const creditData = await creditResponse.json();
-      if (!creditData.success) {
-        throw new Error(creditData.message || "Failed to use credit");
-      }
-
-      // Update user credits in context
-      updateUserCredits(creditData.credits);
-
       // Continue with vivid generation
       const response = await fetch(
         `${API_URL}/sections/divide`,
@@ -301,6 +268,30 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         console.log("Essay creation response:", data);
 
         if (data.success && data.essayId) {
+          // Deduct credit only after successful essay creation
+          const creditResponse = await fetch(`${API_URL}/credits/use`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${authToken}`
+            }
+          });
+
+          if (!creditResponse.ok) {
+            const errorData = await creditResponse.json().catch(() => null);
+            throw new Error(
+              errorData?.message || `Credit error: ${creditResponse.status} ${creditResponse.statusText}`
+            );
+          }
+
+          const creditData = await creditResponse.json();
+          if (!creditData.success) {
+            throw new Error(creditData.message || "Failed to use credit");
+          }
+
+          // Update user credits in context
+          updateUserCredits(creditData.credits);
+
           setEssayCreated(true);
           setEssayViewUrl(`/essay/${data.essayId}`);
           setShowSuccessModal(true);
