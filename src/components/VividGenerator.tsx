@@ -141,40 +141,13 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
       }
       setResult(data.data);
       // Step 2: For each section, fetch one image automatically
-      const sectionImageMap: Record<string, string> = {};
-      for (const section of data.data.sections) {
-        try {
-          const imgRes = await fetch(`${API_URL}/images`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              prompt: section.background_image,
-              maxImages: 1,
-              sectionId: `section_${section.section_number}_background_image`,
-            }),
-          });
-          if (imgRes.ok) {
-            const imgData = await imgRes.json();
-            if (imgData.success && imgData.urls && imgData.urls.length > 0) {
-              sectionImageMap[
-                `section_${section.section_number}_background_image`
-              ] = imgData.urls[0];
-            }
-          }
-        } catch (e) {
-          // If image fetch fails, skip (leave blank)
-        }
-      }
-      setSelectedBackgroundImages(sectionImageMap);
+      // (No longer needed: let backend handle all image selection and fallback)
       // Step 3: Immediately create the essay
-      const updatedSections = data.data.sections.map((section: any) => {
-        const sectionKey = `section_${section.section_number}_background_image`;
-        const selectedImageUrl = sectionImageMap[sectionKey];
-        return {
-          ...section,
-          selected_image_url: selectedImageUrl || "",
-        };
-      });
+      // Use backend's selected_image_url for each section
+      const updatedSections = data.data.sections.map((section: any) => ({
+        ...section,
+        selected_image_url: section.selected_image_url || "",
+      }));
       const updatedResult = {
         ...data.data,
         sections: updatedSections,
