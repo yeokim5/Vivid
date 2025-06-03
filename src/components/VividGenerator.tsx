@@ -42,11 +42,11 @@ interface EssayJsonResponse {
   viewUrl: string;
 }
 
-const VividGenerator: React.FC<VividGeneratorProps> = ({ 
-  title, 
-  content, 
-  titleColor = "#f8f9fa", 
-  textColor = "#f8f9fa", 
+const VividGenerator: React.FC<VividGeneratorProps> = ({
+  title,
+  content,
+  titleColor = "#f8f9fa",
+  textColor = "#f8f9fa",
   fontFamily = "Playfair Display",
   boxBgColor = "#585858",
   boxOpacity = 0.5,
@@ -54,19 +54,15 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   isPrivate = false,
   youtubeUrl = "",
   onPrivacyChange,
-  onYoutubeUrlChange
+  onYoutubeUrlChange,
 }) => {
   const { isAuthenticated, login, user, updateUserCredits } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<SectionData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [backgroundSuggestions, setBackgroundSuggestions] = useState<
-    Record<string, string>
-  >({});
   const [selectedBackgroundImages, setSelectedBackgroundImages] = useState<
     Record<string, string>
   >({});
-  const [showImageSelectionFlow, setShowImageSelectionFlow] = useState(false);
   const [essayCreated, setEssayCreated] = useState(false);
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -98,13 +94,14 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
   const extractYoutubeVideoCode = (url: string): string => {
     if (!url) return "";
-    
+
     try {
       // Handle different YouTube URL formats
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const regExp =
+        /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
       const match = url.match(regExp);
-      
-      return (match && match[2].length === 11) ? match[2] : "";
+
+      return match && match[2].length === 11 ? match[2] : "";
     } catch (error) {
       console.error("Error extracting YouTube video code:", error);
       return "";
@@ -116,34 +113,21 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
       setError("Please sign in to use the Make it Vivid feature");
       return;
     }
-
-    // Check if user has credits
     if (user.credits <= 0) {
-      // Instead of showing the purchase modal directly, show an error with a Get Credits button
       setError("You don't have enough credits to use this feature");
       return;
     }
-
-    // Validate input
     if (!validateInput()) {
       return;
     }
-
     setIsLoading(true);
-
     try {
-      // Continue with vivid generation
-      const response = await fetch(
-        `${API_URL}/sections/divide`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ title, content }),
-        }
-      );
-
+      // Step 1: Divide into sections
+      const response = await fetch(`${API_URL}/sections/divide`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content }),
+      });
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(
@@ -151,28 +135,116 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
             `Server error: ${response.status} ${response.statusText}`
         );
       }
-
       const data = await response.json();
-      console.log("API Response:", data);
-
-      if (data.success && data.data) {
-        // Extract background image suggestions from the sections
-        const suggestions: Record<string, string> = {
-          header_background_image: data.data.header_background_image
-        };
-        data.data.sections.forEach((section: Section, index: number) => {
-          const sectionNumber = index + 1;
-          suggestions[`section_${sectionNumber}_background_image`] =
-            section.background_image;
-        });
-
-        setBackgroundSuggestions(suggestions);
-        setResult(data.data);
-
-        // Open the image selection flow
-        setShowImageSelectionFlow(true);
-      } else {
+      if (!(data.success && data.data)) {
         throw new Error(data.message || "Invalid response from server");
+      }
+      setResult(data.data);
+      // Step 2: For each section, fetch one image automatically
+      const sectionImageMap: Record<string, string> = {};
+      for (const section of data.data.sections) {
+        try {
+          const imgRes = await fetch(`${API_URL}/images`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: section.background_image,
+              maxImages: 1,
+              sectionId: `section_${section.section_number}_background_image`,
+            }),
+          });
+          if (imgRes.ok) {
+            const imgData = await imgRes.json();
+            if (imgData.success && imgData.urls && imgData.urls.length > 0) {
+              sectionImageMap[
+                `section_${section.section_number}_background_image`
+              ] = imgData.urls[0];
+            }
+          }
+        } catch (e) {
+          // If image fetch fails, skip (leave blank)
+        }
+      }
+      setSelectedBackgroundImages(sectionImageMap);
+      // Step 3: Immediately create the essay
+      const updatedSections = data.data.sections.map((section: any) => {
+        const sectionKey = `section_${section.section_number}_background_image`;
+        const selectedImageUrl = sectionImageMap[sectionKey];
+        return {
+          ...section,
+          selected_image_url: selectedImageUrl || "",
+        };
+      });
+      const updatedResult = {
+        ...data.data,
+        sections: updatedSections,
+      };
+      setResult(updatedResult);
+      // Create essay
+      const authToken = localStorage.getItem("auth_token");
+      if (!authToken)
+        throw new Error("Not authenticated. Please log in to create an essay.");
+      const youtubeVideoCode = extractYoutubeVideoCode(youtubeUrl);
+      const essayRes = await fetch(`${API_URL}/essays/html`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          title: updatedResult.title,
+          subtitle: updatedResult.subtitle,
+          header_background_image:
+            updatedResult.header_background_image_url || "",
+          youtubeVideoCode,
+          isPrivate,
+          titleColor,
+          textColor,
+          fontFamily,
+          boxBgColor,
+          boxOpacity,
+          backgroundEffect,
+          content: {
+            title: updatedResult.title,
+            subtitle: updatedResult.subtitle,
+            header_background_image:
+              updatedResult.header_background_image_url || "",
+            sections: updatedResult.sections.map((section: any) => ({
+              section_number: section.section_number,
+              content: section.content,
+              selected_image_url: section.selected_image_url || "",
+            })),
+          },
+        }),
+      });
+      if (!essayRes.ok) {
+        const errorData = await essayRes.json().catch(() => null);
+        throw new Error(
+          errorData?.error ||
+            `Server error: ${essayRes.status} ${essayRes.statusText}`
+        );
+      }
+      const essayData: EssayJsonResponse = await essayRes.json();
+      if (essayData.success && essayData.essayId) {
+        // Deduct credit only after successful essay creation
+        const creditResponse = await fetch(`${API_URL}/credits/use`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+        if (creditResponse.ok) {
+          const creditData = await creditResponse.json();
+          if (creditData.success) {
+            updateUserCredits(creditData.credits);
+          }
+        }
+        setEssayCreated(true);
+        setEssayViewUrl(`/essay/${essayData.essayId}`);
+        setShowSuccessModal(true);
+      } else {
+        throw new Error(essayData.message || "Failed to create essay");
       }
     } catch (err) {
       setError(
@@ -182,135 +254,6 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleBackgroundImagesSelected = async (
-    selectedImages: Record<string, string>
-  ) => {
-    setSelectedBackgroundImages(selectedImages);
-
-    // Update the sections with the selected images
-    if (result) {
-      const updatedSections = result.sections.map((section) => {
-        const sectionKey = `section_${section.section_number}_background_image`;
-        const selectedImageUrl = selectedImages[sectionKey];
-
-        if (selectedImageUrl && selectedImageUrl.startsWith('http')) {
-          return {
-            ...section,
-            selected_image_url: selectedImageUrl,
-          };
-        }
-        return section;
-      });
-
-      const updatedResult = {
-        ...result,
-        sections: updatedSections,
-      };
-
-      setResult(updatedResult);
-
-      try {
-        // Get the auth token from localStorage
-        const authToken = localStorage.getItem("auth_token");
-        if (!authToken) {
-          throw new Error("Not authenticated. Please log in to create an essay.");
-        }
-
-        // Extract YouTube video code if URL is provided
-        const youtubeVideoCode = extractYoutubeVideoCode(youtubeUrl);
-
-        // Create the essay with HTML content
-        const response = await fetch(
-          `${API_URL}/essays/html`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${authToken}`
-            },
-            body: JSON.stringify({
-              title: updatedResult.title,
-              subtitle: updatedResult.subtitle,
-              header_background_image: selectedImages.header_background_image?.startsWith('http') ? selectedImages.header_background_image : '',
-              youtubeVideoCode,
-              isPrivate,
-              titleColor,
-              textColor,
-              fontFamily,
-              boxBgColor,
-              boxOpacity,
-              backgroundEffect,
-              content: {
-                title: updatedResult.title,
-                subtitle: updatedResult.subtitle,
-                header_background_image: selectedImages.header_background_image?.startsWith('http') ? selectedImages.header_background_image : '',
-                sections: updatedResult.sections.map(section => ({
-                  section_number: section.section_number,
-                  content: section.content,
-                  selected_image_url: section.selected_image_url?.startsWith('http') ? section.selected_image_url : ''
-                }))
-              }
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => null);
-          throw new Error(
-            errorData?.error ||
-              `Server error: ${response.status} ${response.statusText}`
-          );
-        }
-
-        const data: EssayJsonResponse = await response.json();
-        console.log("Essay creation response:", data);
-
-        if (data.success && data.essayId) {
-          // Deduct credit only after successful essay creation
-          const creditResponse = await fetch(`${API_URL}/credits/use`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${authToken}`
-            }
-          });
-
-          if (!creditResponse.ok) {
-            const errorData = await creditResponse.json().catch(() => null);
-            throw new Error(
-              errorData?.message || `Credit error: ${creditResponse.status} ${creditResponse.statusText}`
-            );
-          }
-
-          const creditData = await creditResponse.json();
-          if (!creditData.success) {
-            throw new Error(creditData.message || "Failed to use credit");
-          }
-
-          // Update user credits in context
-          updateUserCredits(creditData.credits);
-
-          setEssayCreated(true);
-          setEssayViewUrl(`/essay/${data.essayId}`);
-          setShowSuccessModal(true);
-          setShowImageSelectionFlow(false); // Close the image selection flow
-        } else {
-          throw new Error(data.message || "Failed to create essay");
-        }
-      } catch (err) {
-        console.error("Error creating essay:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to create essay"
-        );
-        setShowImageSelectionFlow(false);
-      }
-    }
-  };
-
-  const handleCloseImageSelectionFlow = () => {
-    setShowImageSelectionFlow(false);
   };
 
   const handleCloseSuccessModal = () => {
@@ -341,7 +284,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         <div className="error-container">
           <div className="error-message">{error}</div>
           {error.includes("enough credits") && user && (
-            <button 
+            <button
               className="get-credits-btn"
               onClick={() => setShowPurchaseModal(true)}
             >
@@ -351,15 +294,6 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         </div>
       )}
 
-      {showImageSelectionFlow && result && (
-        <ImageSelectionFlow
-          sections={result.sections}
-          backgroundSuggestions={backgroundSuggestions}
-          onImagesSelected={handleBackgroundImagesSelected}
-          onClose={() => setShowImageSelectionFlow(false)}
-        />
-      )}
-
       {showSuccessModal && essayViewUrl && (
         <SuccessModal
           isOpen={showSuccessModal}
@@ -367,7 +301,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
           essayViewUrl={essayViewUrl}
         />
       )}
-      
+
       {showPurchaseModal && user && (
         <ModalPortal>
           <PurchaseCreditsModal

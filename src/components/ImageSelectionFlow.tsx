@@ -1,3 +1,4 @@
+// DEPRECATED: This component is no longer used in the new auto-selection flow. All image selection is now automatic and handled in VividGenerator.tsx.
 import React, { useState, useEffect } from "react";
 import ImageSelectionModal from "./ImageSelectionModal";
 import "../styles/ImageSelectionFlow.css";
@@ -23,11 +24,18 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   onClose,
 }) => {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(-1); // Start at -1 for header
-  const [selectedImages, setSelectedImages] = useState<Record<string, string>>({});
-  const [allSectionImages, setAllSectionImages] = useState<Record<string, string[]>>({});
-  const [loadingSections, setLoadingSections] = useState<Record<string, boolean>>({});
+  const [selectedImages, setSelectedImages] = useState<Record<string, string>>(
+    {}
+  );
+  const [allSectionImages, setAllSectionImages] = useState<
+    Record<string, string[]>
+  >({});
+  const [loadingSections, setLoadingSections] = useState<
+    Record<string, boolean>
+  >({});
   const [error, setError] = useState<string | null>(null);
-  const [loadingSectionRetry, setLoadingSectionRetry] = useState<boolean>(false);
+  const [loadingSectionRetry, setLoadingSectionRetry] =
+    useState<boolean>(false);
   const [queuedSections, setQueuedSections] = useState<string[]>([]);
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
@@ -41,8 +49,11 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          sectionId: currentSectionIndex === -1 ? 'header_background_image' : `section_${sections[currentSectionIndex]?.section_number}_background_image`
-        })
+          sectionId:
+            currentSectionIndex === -1
+              ? "header_background_image"
+              : `section_${sections[currentSectionIndex]?.section_number}_background_image`,
+        }),
       });
     } catch (err) {
       console.error("Error cleaning up backend:", err);
@@ -54,12 +65,17 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     return () => {
       cleanup();
     };
-  }, []);  // Remove dependencies, only run on unmount
+  }, []); // Remove dependencies, only run on unmount
 
   // Initialize queue with header and all section numbers
   useEffect(() => {
     if (sections.length > 0) {
-      const sectionKeys = ['header_background_image', ...sections.map(section => `section_${section.section_number}_background_image`)];
+      const sectionKeys = [
+        "header_background_image",
+        ...sections.map(
+          (section) => `section_${section.section_number}_background_image`
+        ),
+      ];
       setQueuedSections(sectionKeys);
     }
   }, [sections]);
@@ -70,24 +86,46 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
       if (queuedSections.length === 0) return;
 
       const nextKey = queuedSections[0];
-      const isHeader = nextKey === 'header_background_image';
-      const nextSection = isHeader ? null : sections.find(s => `section_${s.section_number}_background_image` === nextKey);
-      
-      if ((isHeader || nextSection) && !allSectionImages[nextKey] && !loadingSections[nextKey]) {
-        await loadImagesForSection(nextKey, isHeader ? backgroundSuggestions.header_background_image : nextSection?.background_image);
-        setQueuedSections(prev => prev.slice(1));
+      const isHeader = nextKey === "header_background_image";
+      const nextSection = isHeader
+        ? null
+        : sections.find(
+            (s) => `section_${s.section_number}_background_image` === nextKey
+          );
+
+      if (
+        (isHeader || nextSection) &&
+        !allSectionImages[nextKey] &&
+        !loadingSections[nextKey]
+      ) {
+        await loadImagesForSection(
+          nextKey,
+          isHeader
+            ? backgroundSuggestions.header_background_image
+            : nextSection?.background_image
+        );
+        setQueuedSections((prev) => prev.slice(1));
       }
     };
 
     processNextSection();
-  }, [queuedSections, sections, allSectionImages, loadingSections, backgroundSuggestions]);
+  }, [
+    queuedSections,
+    sections,
+    allSectionImages,
+    loadingSections,
+    backgroundSuggestions,
+  ]);
 
-  const loadImagesForSection = async (key: string, prompt: string | undefined) => {
+  const loadImagesForSection = async (
+    key: string,
+    prompt: string | undefined
+  ) => {
     if (!prompt || loadingSections[key]) {
       return;
     }
 
-    setLoadingSections(prev => ({
+    setLoadingSections((prev) => ({
       ...prev,
       [key]: true,
     }));
@@ -102,7 +140,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
           prompt: prompt,
           maxImages: 10,
           sectionId: key,
-        })
+        }),
       });
 
       if (!response.ok) {
@@ -112,24 +150,24 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
       const data = await response.json();
 
       if (data.success && data.urls && data.urls.length > 0) {
-        setAllSectionImages(prev => ({
+        setAllSectionImages((prev) => ({
           ...prev,
           [key]: data.urls,
         }));
       } else {
-        setAllSectionImages(prev => ({
+        setAllSectionImages((prev) => ({
           ...prev,
           [key]: [],
         }));
       }
     } catch (err: unknown) {
       console.error(`Error loading images for ${key}:`, err);
-      setAllSectionImages(prev => ({
+      setAllSectionImages((prev) => ({
         ...prev,
         [key]: [],
       }));
     } finally {
-      setLoadingSections(prev => ({
+      setLoadingSections((prev) => ({
         ...prev,
         [key]: false,
       }));
@@ -137,9 +175,15 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   };
 
   const handleRetryLoadImagesForCurrentSection = async () => {
-    const currentKey = currentSectionIndex === -1 ? 'header_background_image' : `section_${sections[currentSectionIndex]?.section_number}_background_image`;
-    const prompt = currentSectionIndex === -1 ? backgroundSuggestions.header_background_image : sections[currentSectionIndex]?.background_image;
-    
+    const currentKey =
+      currentSectionIndex === -1
+        ? "header_background_image"
+        : `section_${sections[currentSectionIndex]?.section_number}_background_image`;
+    const prompt =
+      currentSectionIndex === -1
+        ? backgroundSuggestions.header_background_image
+        : sections[currentSectionIndex]?.background_image;
+
     if (!prompt) return;
 
     setLoadingSectionRetry(true);
@@ -153,7 +197,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
         body: JSON.stringify({
           prompt: prompt,
           maxImages: 10,
-        })
+        }),
       });
 
       if (!response.ok) {
@@ -163,7 +207,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
       const data = await response.json();
 
       if (data.success && data.urls && data.urls.length > 0) {
-        setAllSectionImages(prev => ({
+        setAllSectionImages((prev) => ({
           ...prev,
           [currentKey]: data.urls,
         }));
@@ -176,12 +220,15 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   };
 
   const handleSelectImage = (imageUrl: string) => {
-    const currentKey = currentSectionIndex === -1 ? 'header_background_image' : `section_${sections[currentSectionIndex]?.section_number}_background_image`;
-    
+    const currentKey =
+      currentSectionIndex === -1
+        ? "header_background_image"
+        : `section_${sections[currentSectionIndex]?.section_number}_background_image`;
+
     // Create a new state with the current selection
     const newSelectedImages = {
       ...selectedImages,
-      [currentKey]: imageUrl
+      [currentKey]: imageUrl,
     };
 
     // Update the state
@@ -210,7 +257,10 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
   const progress = ((currentSectionIndex + 2) / (sections.length + 1)) * 100;
 
   // Get images for the current section
-  const currentKey = currentSectionIndex === -1 ? 'header_background_image' : `section_${sections[currentSectionIndex]?.section_number}_background_image`;
+  const currentKey =
+    currentSectionIndex === -1
+      ? "header_background_image"
+      : `section_${sections[currentSectionIndex]?.section_number}_background_image`;
   const currentImages = allSectionImages[currentKey] || [];
 
   // Check if current section is still loading
@@ -218,7 +268,7 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
 
   // Handle modal close
   const handleClose = () => {
-    cleanup();  // Call cleanup when user closes the modal
+    cleanup(); // Call cleanup when user closes the modal
     onClose();
   };
 
@@ -226,11 +276,15 @@ const ImageSelectionFlow: React.FC<ImageSelectionFlowProps> = ({
     <ImageSelectionModal
       isOpen={sections.length > 0}
       onClose={handleClose}
-      section={currentSectionIndex === -1 ? {
-        section_number: 0,
-        content: "Choose Background For Title Section",
-        background_image: backgroundSuggestions.header_background_image
-      } : sections[currentSectionIndex]}
+      section={
+        currentSectionIndex === -1
+          ? {
+              section_number: 0,
+              content: "Choose Background For Title Section",
+              background_image: backgroundSuggestions.header_background_image,
+            }
+          : sections[currentSectionIndex]
+      }
       images={currentImages}
       onSelectImage={handleSelectImage}
       onRetryLoad={handleRetryLoadImagesForCurrentSection}
