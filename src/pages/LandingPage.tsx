@@ -110,9 +110,9 @@ const LandingPage: React.FC = () => {
 
   const handleEssayChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
-    // Limit to 1000 words
+    // Limit to 500 words
     const words = text.trim().split(/\s+/);
-    if (words.length <= 1000) {
+    if (words.length <= 500) {
       setEssayText(text);
     }
     setIsTyping(text.length > 0);
@@ -276,11 +276,11 @@ const LandingPage: React.FC = () => {
             />
             <textarea
               className={`essay-input ${isTyping ? "has-text" : ""}`}
-              placeholder="Paste your text here (limited to 1000 words)..."
+              placeholder="Paste your text here (limited to 500 words)..."
               value={essayText}
               onChange={handleEssayChange}
             />
-            <div className="word-count">{wordCount}/1000 words</div>
+            <div className="word-count">{wordCount}/500 words</div>
 
             {/* Customize Toggle Button */}
             <button
