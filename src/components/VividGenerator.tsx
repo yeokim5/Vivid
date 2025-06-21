@@ -5,6 +5,8 @@ import SuccessModal from "./SuccessModal";
 import PurchaseCreditsModal from "./PurchaseCreditsModal";
 import ModalPortal from "./ModalPortal";
 import { useAuth } from "../context/AuthContext";
+import { createApiUrl, getAuthHeaders, API_CONFIG } from "../config/api";
+import { DEFAULT_STYLES } from "../constants/styles";
 
 interface VividGeneratorProps {
   title: string;
@@ -45,12 +47,12 @@ interface EssayJsonResponse {
 const VividGenerator: React.FC<VividGeneratorProps> = ({
   title,
   content,
-  titleColor = "#f8f9fa",
-  textColor = "#f8f9fa",
-  fontFamily = "Playfair Display",
-  boxBgColor = "#585858",
-  boxOpacity = 0.5,
-  backgroundEffect = "none",
+  titleColor = DEFAULT_STYLES.titleColor,
+  textColor = DEFAULT_STYLES.textColor,
+  fontFamily = DEFAULT_STYLES.fontFamily,
+  boxBgColor = DEFAULT_STYLES.boxBgColor,
+  boxOpacity = DEFAULT_STYLES.boxOpacity,
+  backgroundEffect = DEFAULT_STYLES.backgroundEffect,
   isPrivate = false,
   youtubeUrl = "",
   onPrivacyChange,
@@ -67,7 +69,6 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -123,11 +124,14 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
     setIsLoading(true);
     try {
       // Step 1: Divide into sections
-      const response = await fetch(`${API_URL}/sections/divide`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content }),
-      });
+      const response = await fetch(
+        createApiUrl(API_CONFIG.ENDPOINTS.SECTIONS.DIVIDE),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, content }),
+        }
+      );
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(
@@ -154,42 +158,45 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
       };
       setResult(updatedResult);
       // Create essay
-      const authToken = localStorage.getItem("auth_token");
-      if (!authToken)
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders.Authorization)
         throw new Error("Not authenticated. Please log in to create an essay.");
       const youtubeVideoCode = extractYoutubeVideoCode(youtubeUrl);
-      const essayRes = await fetch(`${API_URL}/essays/html`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          title: updatedResult.title,
-          subtitle: updatedResult.subtitle,
-          header_background_image:
-            updatedResult.header_background_image_url || "",
-          youtubeVideoCode,
-          isPrivate,
-          titleColor,
-          textColor,
-          fontFamily,
-          boxBgColor,
-          boxOpacity,
-          backgroundEffect,
-          content: {
+      const essayRes = await fetch(
+        createApiUrl(API_CONFIG.ENDPOINTS.ESSAYS.HTML),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...authHeaders,
+          },
+          body: JSON.stringify({
             title: updatedResult.title,
             subtitle: updatedResult.subtitle,
             header_background_image:
               updatedResult.header_background_image_url || "",
-            sections: updatedResult.sections.map((section: any) => ({
-              section_number: section.section_number,
-              content: section.content,
-              selected_image_url: section.selected_image_url || "",
-            })),
-          },
-        }),
-      });
+            youtubeVideoCode,
+            isPrivate,
+            titleColor,
+            textColor,
+            fontFamily,
+            boxBgColor,
+            boxOpacity,
+            backgroundEffect,
+            content: {
+              title: updatedResult.title,
+              subtitle: updatedResult.subtitle,
+              header_background_image:
+                updatedResult.header_background_image_url || "",
+              sections: updatedResult.sections.map((section: any) => ({
+                section_number: section.section_number,
+                content: section.content,
+                selected_image_url: section.selected_image_url || "",
+              })),
+            },
+          }),
+        }
+      );
       if (!essayRes.ok) {
         const errorData = await essayRes.json().catch(() => null);
         throw new Error(
@@ -200,11 +207,11 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
       const essayData: EssayJsonResponse = await essayRes.json();
       if (essayData.success && essayData.essayId) {
         // Deduct credit only after successful essay creation
-        const creditResponse = await fetch(`${API_URL}/credits/use`, {
+        const creditResponse = await fetch(createApiUrl("/credits/use"), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
+            ...authHeaders,
           },
         });
         if (creditResponse.ok) {

@@ -5,6 +5,8 @@ import VividGenerator from "../components/VividGenerator";
 import BackgroundEffects from "../components/BackgroundEffects";
 import CustomizeEssay from "../components/CustomizeEssay";
 import FluidBackground from "../components/FluidBackground";
+import { createApiUrl } from "../config/api";
+import { DEFAULT_STYLES, FONT_OPTIONS } from "../constants/styles";
 import "../styles/LandingPage.css";
 
 interface Essay {
@@ -55,16 +57,24 @@ const LandingPage: React.FC = () => {
   const [essayTitle, setEssayTitle] = useState("");
   const [essayText, setEssayText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [titleColor, setTitleColor] = useState("#f8f9fa"); // Default white
-  const [textColor, setTextColor] = useState("#f8f9fa"); // Default white
-  const [selectedFont, setSelectedFont] = useState("Playfair Display"); // Default font
-  const [boxBgColor, setBoxBgColor] = useState("#585858"); // Default box background color
-  const [boxOpacity, setBoxOpacity] = useState(0.5); // Default box opacity
-  const [selectedBackgroundEffect, setSelectedBackgroundEffect] = useState("none"); // Default background effect
-  const [isPrivate, setIsPrivate] = useState(false); // Add privacy state
-  const [youtubeUrl, setYoutubeUrl] = useState(""); // Add YouTube URL state
-  const [showCustomize, setShowCustomize] = useState(false); // State to toggle customize section
-  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+  const [titleColor, setTitleColor] = useState<string>(
+    DEFAULT_STYLES.titleColor
+  );
+  const [textColor, setTextColor] = useState<string>(DEFAULT_STYLES.textColor);
+  const [selectedFont, setSelectedFont] = useState<string>(
+    DEFAULT_STYLES.fontFamily
+  );
+  const [boxBgColor, setBoxBgColor] = useState<string>(
+    DEFAULT_STYLES.boxBgColor
+  );
+  const [boxOpacity, setBoxOpacity] = useState<number>(
+    DEFAULT_STYLES.boxOpacity
+  );
+  const [selectedBackgroundEffect, setSelectedBackgroundEffect] =
+    useState<string>(DEFAULT_STYLES.backgroundEffect);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [showCustomize, setShowCustomize] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -76,7 +86,9 @@ const LandingPage: React.FC = () => {
     // Fetch popular essays
     const fetchPopularEssays = async () => {
       try {
-        const response = await fetch(`${API_URL}/essays?sortBy=popular&limit=3`);
+        const response = await fetch(
+          createApiUrl("/essays?sortBy=popular&limit=3")
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch essays");
         }
@@ -90,7 +102,7 @@ const LandingPage: React.FC = () => {
 
     fetchPopularEssays();
     return () => clearTimeout(timer);
-  }, [API_URL]);
+  }, []);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEssayTitle(e.target.value);
@@ -113,27 +125,19 @@ const LandingPage: React.FC = () => {
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      year: "numeric"
+      year: "numeric",
     });
   };
 
   const handleExploreMore = () => {
-    navigate('/essays');
+    navigate("/essays");
   };
 
   const toggleCustomizeSection = () => {
     setShowCustomize(!showCustomize);
   };
 
-  const fontOptions = [
-    "Playfair Display", 
-    "Inter", 
-    "Roboto", 
-    "Montserrat", 
-    "Lora", 
-    "Merriweather", 
-    "Open Sans"
-  ];
+  const fontOptions = [...FONT_OPTIONS];
 
   // Use useEffect to load fonts for the dropdown
   useEffect(() => {
@@ -144,34 +148,35 @@ const LandingPage: React.FC = () => {
       // but not apply them globally
       const WebFontConfig = {
         google: {
-          families: fontOptions.map(font => `${font}:400,700`)
+          families: fontOptions.map((font) => `${font}:400,700`),
         },
-        classes: false,  // Don't add classes to the HTML element
-        events: false    // Don't trigger events
+        classes: false, // Don't add classes to the HTML element
+        events: false, // Don't trigger events
       };
-      
+
       // Create a script element for Web Font Loader
-      const script = document.createElement('script');
-      script.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js';
+      const script = document.createElement("script");
+      script.src =
+        "https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js";
       script.async = true;
-      
+
       // Once the script is loaded, configure it
       script.onload = () => {
         // @ts-ignore
         window.WebFont.load(WebFontConfig);
       };
-      
+
       document.head.appendChild(script);
     };
-    
+
     loadFonts();
   }, []);
-  
+
   // Separate useEffect to apply the selected font ONLY to the preview section
   useEffect(() => {
     // Create a style element to scope the font to the preview only
-    const style = document.createElement('style');
-    
+    const style = document.createElement("style");
+
     // Create the stylesheet with scoped selectors for the preview only
     // We use !important to ensure it doesn't leak to other elements
     style.textContent = `
@@ -185,44 +190,48 @@ const LandingPage: React.FC = () => {
         font-family: "Merriweather", monospace !important;
       }
     `;
-    style.id = 'dynamic-font-style';
-    
+    style.id = "dynamic-font-style";
+
     // Remove any existing dynamic font style
-    const existingStyle = document.getElementById('dynamic-font-style');
+    const existingStyle = document.getElementById("dynamic-font-style");
     if (existingStyle) {
       document.head.removeChild(existingStyle);
     }
-    
+
     // Add the new style
     document.head.appendChild(style);
-    
+
     return () => {
       // Cleanup function
-      const styleToRemove = document.getElementById('dynamic-font-style');
+      const styleToRemove = document.getElementById("dynamic-font-style");
       if (styleToRemove) {
         document.head.removeChild(styleToRemove);
       }
     };
   }, [selectedFont]);
-  
+
   // Effect to handle background effects
   useEffect(() => {
-    const style = document.createElement('style');
-    style.id = 'main-background-effect-style';
-    
+    const style = document.createElement("style");
+    style.id = "main-background-effect-style";
+
     // Remove any existing style first
-    const existingStyle = document.getElementById('main-background-effect-style');
+    const existingStyle = document.getElementById(
+      "main-background-effect-style"
+    );
     if (existingStyle) {
       document.head.removeChild(existingStyle);
     }
-    
+
     // Add the style to the document head if needed in the future
     if (style.textContent) {
       document.head.appendChild(style);
     }
-    
+
     return () => {
-      const styleToRemove = document.getElementById('main-background-effect-style');
+      const styleToRemove = document.getElementById(
+        "main-background-effect-style"
+      );
       if (styleToRemove) {
         document.head.removeChild(styleToRemove);
       }
@@ -236,11 +245,15 @@ const LandingPage: React.FC = () => {
       <div className="hero-section">
         <FluidBackground complexity={2} />
         {/* Add the active background effect to the main app, but not for heart effect */}
-        {selectedBackgroundEffect !== 'none' && selectedBackgroundEffect !== 'heart' && (
-          <BackgroundEffects selectedEffect={selectedBackgroundEffect} onSelectEffect={setSelectedBackgroundEffect} />
-        )}
+        {selectedBackgroundEffect !== "none" &&
+          selectedBackgroundEffect !== "heart" && (
+            <BackgroundEffects
+              selectedEffect={selectedBackgroundEffect}
+              onSelectEffect={setSelectedBackgroundEffect}
+            />
+          )}
         <div className="hero-content">
-          <h1 style={{fontFamily: "Ariel"}}>Vivid</h1>
+          <h1 style={{ fontFamily: "Ariel" }}>Vivid</h1>
           <h2>
             Transform Your
             <span className="rotating-words">
@@ -270,12 +283,12 @@ const LandingPage: React.FC = () => {
             <div className="word-count">{wordCount}/1000 words</div>
 
             {/* Customize Toggle Button */}
-            <button 
+            <button
               className="customize-toggle-btn"
               onClick={toggleCustomizeSection}
             >
               Customize Your Appearance
-              <span className="toggle-arrow">{showCustomize ? '▲' : '▼'}</span>
+              <span className="toggle-arrow">{showCustomize ? "▲" : "▼"}</span>
             </button>
 
             {/* Conditionally render the customize component */}
@@ -301,9 +314,9 @@ const LandingPage: React.FC = () => {
               />
             )}
 
-            <VividGenerator 
-              title={essayTitle} 
-              content={essayText} 
+            <VividGenerator
+              title={essayTitle}
+              content={essayText}
               titleColor={titleColor}
               textColor={textColor}
               fontFamily={selectedFont}
@@ -321,27 +334,35 @@ const LandingPage: React.FC = () => {
 
       <div className="popular-essays-section">
         <h2>Vivid Essays</h2>
-        <p className="section-subtitle">Discover our readers' favorite pieces</p>
-        
+        <p className="section-subtitle">
+          Discover our readers' favorite pieces
+        </p>
+
         <div className="essays-grid">
           {essays.map((essay) => (
-            <div 
-              key={essay._id} 
+            <div
+              key={essay._id}
               className="essay-card"
               onClick={() => navigate(`/essay/${essay._id}`)}
             >
               {essay.header_background_image && (
-                <div 
+                <div
                   className="essay-header-image"
-                  style={{ backgroundImage: `url(${essay.header_background_image})` }}
+                  style={{
+                    backgroundImage: `url(${essay.header_background_image})`,
+                  }}
                 />
               )}
               <div className="essay-content">
                 {essay.tags && essay.tags.length > 0 && (
                   <div className="essay-tags">
-                    {essay.tags.filter(tag => tag !== 'html-essay').map(tag => (
-                      <span key={tag} className="essay-tag">{tag}</span>
-                    ))}
+                    {essay.tags
+                      .filter((tag) => tag !== "html-essay")
+                      .map((tag) => (
+                        <span key={tag} className="essay-tag">
+                          {tag}
+                        </span>
+                      ))}
                   </div>
                 )}
                 <h3>{essay.title}</h3>
@@ -349,7 +370,9 @@ const LandingPage: React.FC = () => {
                 <div className="essay-meta">
                   <div className="meta-left">
                     <span className="essay-author">By {essay.author.name}</span>
-                    <span className="essay-date">{formatDate(essay.createdAt)}</span>
+                    <span className="essay-date">
+                      {formatDate(essay.createdAt)}
+                    </span>
                   </div>
                   <span className="essay-views">{essay.views} views</span>
                 </div>
