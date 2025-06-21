@@ -1,175 +1,303 @@
-// Background effects initialization
-document.addEventListener('DOMContentLoaded', function() {
-  // Wait for the page to finish loading
-  window.addEventListener('load', function() {
-    // Use the global backgroundEffect variable
-    if (typeof window.backgroundEffect !== 'undefined') {
-      initBackgroundEffect(window.backgroundEffect);
-    } else {
-      console.warn('Background effect not defined, defaulting to none');
-      initBackgroundEffect('none');
-    }
-  });
-});
+// Background Effects Script for Final Essays
+// This should match the preview implementation exactly
 
 /**
  * Initialize the selected background effect
  * @param {string} effectType - The type of effect to initialize
  */
 function initBackgroundEffect(effectType) {
-  if (!effectType || effectType === 'none') return;
-  
+  if (!effectType || effectType === "none") return;
+
   // Remove any existing effect containers
-  const existingEffects = document.querySelectorAll('.background-effect-container');
-  existingEffects.forEach(el => el.remove());
-  
+  const existingEffects = document.querySelectorAll(
+    ".background-effect-container"
+  );
+  existingEffects.forEach((el) => el.remove());
+
   // Create the effect container
-  const effectContainer = document.createElement('div');
-  effectContainer.className = 'background-effect-container';
-  
+  const effectContainer = document.createElement("div");
+  effectContainer.className = "background-effect-container";
+
   // Add specific effect implementation
   switch (effectType) {
-    case 'firefly':
+    case "heart":
+      createHeartEffect(effectContainer);
+      break;
+    case "firefly":
       createFireflyEffect(effectContainer);
       break;
-    case 'particles':
+    case "particles":
       createParticlesEffect(effectContainer);
       break;
   }
-  
+
   // Add the effect container to the body
   document.body.appendChild(effectContainer);
 }
 
 /**
- * Create a firefly-like particles effect
+ * Create heart effect that matches the preview exactly
+ * @param {HTMLElement} container - The container element
+ */
+function createHeartEffect(container) {
+  // Set up the container styles
+  container.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: hidden;
+  `;
+
+  // Heart creation function
+  const createHeart = () => {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.innerHTML = "💗";
+
+    // Apply styles that match the preview
+    heart.style.cssText = `
+      position: fixed;
+      font-size: 1.5rem;
+      top: -1vh;
+      transform: translateY(0);
+      animation: fall 3s linear forwards;
+      pointer-events: none;
+      z-index: 5;
+    `;
+
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.animationDuration = Math.random() * 2 + 3 + "s";
+
+    container.appendChild(heart);
+
+    // Remove heart after animation completes
+    setTimeout(() => {
+      if (heart.parentNode) {
+        heart.remove();
+      }
+    }, 5000);
+  };
+
+  // Create initial hearts
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => createHeart(), Math.random() * 1500);
+  }
+
+  // Set interval to create hearts continuously
+  setInterval(createHeart, 300);
+}
+
+/**
+ * Create firefly effect that exactly matches the preview implementation
  * @param {HTMLElement} container - The container element
  */
 function createFireflyEffect(container) {
-  container.innerHTML = `
-    <style>
-      .background-effect-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: -1;
-        overflow: hidden;
-      }
-      
-      .firefly {
-        position: absolute;
-        width: 3px;
-        height: 3px;
-        border-radius: 50%;
-        background: #fff;
-        box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
-        opacity: 0;
-        animation: firefly linear infinite;
-      }
-      
-      @keyframes firefly {
-        0% { opacity: 0; transform: translateY(0) translateX(0) scale(0.2); }
-        10% { opacity: 1; }
-        90% { opacity: 1; }
-        100% { opacity: 0; transform: translateY(-100px) translateX(100px) scale(1); }
-      }
-    </style>
+  // Set up the container styles
+  container.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: hidden;
   `;
-  
-  // Create multiple fireflies
-  for (let i = 0; i < 50; i++) {
-    const firefly = document.createElement('div');
-    firefly.className = 'firefly';
-    
-    // Randomize firefly properties
-    const size = Math.random() * 2 + 1;
-    const left = Math.random() * 100;
-    const top = Math.random() * 100;
-    const duration = Math.random() * 6 + 4;
-    const delay = Math.random() * -10;
-    
-    firefly.style.width = `${size}px`;
-    firefly.style.height = `${size}px`;
-    firefly.style.left = `${left}%`;
-    firefly.style.top = `${top}%`;
-    firefly.style.animationDuration = `${duration}s`;
-    firefly.style.animationDelay = `${delay}s`;
-    
-    // Alternate between yellow and white for more realistic firefly effect
-    if (i % 2 === 0) {
-      firefly.style.background = '#ffbb00';
-      firefly.style.boxShadow = '0 0 10px 2px rgba(255, 187, 0, 0.8)';
+
+  // Add the base firefly CSS styles that match the preview
+  const style = document.createElement("style");
+  style.textContent = `
+    .firefly {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0.4vw;
+      height: 0.4vw;
+      margin: -0.2vw 0 0 9.8vw;
+      pointer-events: none;
+      animation: ease 60s alternate infinite;
+      z-index: 5;
     }
-    
+
+    .firefly::before,
+    .firefly::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      transform-origin: -10vw;
+    }
+
+    .firefly::before {
+      background: black;
+      opacity: 0.4;
+      animation: drift ease alternate infinite;
+    }
+
+    .firefly::after {
+      background: white;
+      opacity: 0;
+      box-shadow: 0 0 0vw 0vw yellow;
+      animation: drift ease alternate infinite, flash ease infinite;
+    }
+
+    @keyframes drift {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes flash {
+      0%, 30%, 100% {
+        opacity: 0;
+        box-shadow: 0 0 0vw 0vw yellow;
+      }
+      5% {
+        opacity: 1;
+        box-shadow: 0 0 2vw 0.4vw yellow;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Create fireflies that exactly match the preview implementation
+  for (let i = 0; i < 15; i++) {
+    const firefly = document.createElement("div");
+    firefly.classList.add("firefly");
+
+    // Position exactly like in the preview
+    firefly.style.left = "50%";
+    firefly.style.top = "50%";
+    firefly.style.margin = "-0.2vw 0 0 9.8vw";
+
+    // Generate random animation durations like in the preview
+    const rotationSpeed = Math.floor(Math.random() * 10) + 8;
+    const flashDuration = Math.floor(Math.random() * 3000) + 2000;
+    const flashDelay = Math.floor(Math.random() * 2000) + 500;
+
+    // Add the exact same nth-child styling as the preview
+    const styleElement = document.createElement("style");
+    styleElement.textContent = `
+      .firefly:nth-child(${i + 1})::before {
+        animation-duration: ${rotationSpeed}s;
+      }
+      .firefly:nth-child(${i + 1})::after {
+        animation-duration: ${rotationSpeed}s, ${flashDuration}ms;
+        animation-delay: 0ms, ${flashDelay}ms;
+      }
+    `;
+
+    firefly.appendChild(styleElement);
     container.appendChild(firefly);
   }
 }
 
 /**
- * Create a floating particles effect
+ * Create particles effect that matches the preview exactly
  * @param {HTMLElement} container - The container element
  */
 function createParticlesEffect(container) {
-  container.innerHTML = `
-    <style>
-      .background-effect-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: -1;
-        overflow: hidden;
-      }
-      
-      .particle {
-        position: absolute;
-        border-radius: 50%;
-        opacity: 0.6;
-        animation: float linear infinite;
-        bottom: -20px;
-      }
-      
-      @keyframes float {
-        0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-        10% { opacity: 0.6; }
-        90% { opacity: 0.6; }
-        100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
-      }
-    </style>
+  // Set up the container styles
+  container.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: hidden;
   `;
-  
-  // Particle colors
-  const colors = [
-    '#ffffff', // White
-    '#7f7fd5', // Purple
-    '#86a8e7', // Blue
-    '#91eae4'  // Cyan
-  ];
-  
-  // Create multiple particles
-  for (let i = 0; i < 80; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    
-    // Randomize particle properties
-    const size = Math.random() * 5 + 1;
+
+  // Add the particles CSS styles that match the preview
+  const style = document.createElement("style");
+  style.textContent = `
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      bottom: -20px;
+      animation: preview-float 15s infinite;
+      opacity: 0.6;
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+
+    .particle:nth-child(3n) {
+      width: 4px;
+      height: 4px;
+      background-color: rgba(93, 95, 226, 0.8);
+      animation-duration: 25s;
+      animation-delay: -5s;
+      box-shadow: 0 0 5px rgba(93, 95, 226, 0.5);
+    }
+
+    .particle:nth-child(4n) {
+      width: 8px;
+      height: 8px;
+      background-color: rgba(255, 107, 139, 0.8);
+      animation-duration: 20s;
+      animation-delay: -10s;
+      box-shadow: 0 0 5px rgba(255, 107, 139, 0.5);
+    }
+
+    @keyframes preview-float {
+      0% {
+        transform: translateY(0);
+        opacity: 0;
+      }
+      5% {
+        opacity: 0.6;
+      }
+      95% {
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-100vh);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Create particles that match the preview implementation
+  for (let i = 0; i < 25; i++) {
+    const particle = document.createElement("div");
+    particle.className = "particle";
+
+    // Position at the bottom like in the preview
     const left = Math.random() * 100;
-    const duration = Math.random() * 15 + 10;
-    const delay = Math.random() * -20;
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    
-    particle.style.width = `${size}px`;
-    particle.style.height = `${size}px`;
     particle.style.left = `${left}%`;
-    particle.style.background = color;
-    particle.style.animationDuration = `${duration}s`;
+    particle.style.bottom = "-20px";
+
+    // Add random delay to make movement more natural
+    const delay = Math.random() * 20;
     particle.style.animationDelay = `${delay}s`;
-    
+
     container.appendChild(particle);
   }
-} 
+}
+
+// Initialize background effect when the script loads
+document.addEventListener("DOMContentLoaded", function () {
+  // Try to get the background effect from the global scope
+  const backgroundEffect =
+    window.essayBackgroundEffect || window.backgroundEffect;
+
+  if (backgroundEffect && backgroundEffect !== "none") {
+    console.log("Initializing background effect:", backgroundEffect);
+    initBackgroundEffect(backgroundEffect);
+  }
+});
+
+// Make the function available globally for manual initialization
+window.initBackgroundEffect = initBackgroundEffect;

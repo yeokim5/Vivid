@@ -41,6 +41,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Initialize background effects
+  setTimeout(() => {
+    const backgroundEffect =
+      window.essayBackgroundEffect || window.backgroundEffect;
+    if (backgroundEffect && backgroundEffect !== "none") {
+      console.log(
+        "Essay template initializing background effect:",
+        backgroundEffect
+      );
+
+      // Make sure the background effects script is loaded
+      if (typeof window.initBackgroundEffect === "function") {
+        window.initBackgroundEffect(backgroundEffect);
+      } else {
+        console.warn("Background effects script not loaded yet, retrying...");
+        // Retry after a short delay
+        setTimeout(() => {
+          if (typeof window.initBackgroundEffect === "function") {
+            window.initBackgroundEffect(backgroundEffect);
+          } else {
+            console.error("Background effects script failed to load");
+          }
+        }, 1000);
+      }
+    }
+  }, 1500);
+
   // Handle visibility of share and "Make Your Own" buttons based on current section
   const sections = document.querySelectorAll("section");
   const shareButton = document.querySelector(".share-button");
