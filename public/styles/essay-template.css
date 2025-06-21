@@ -4,7 +4,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -150,7 +151,11 @@ h2 {
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
   40% {
@@ -195,7 +200,12 @@ section {
   text-shadow: none;
   padding: clamp(1.5rem, 4vw, 3rem);
   backdrop-filter: blur(10px) saturate(180%);
-  background: rgba(88, 88, 88, 0.5); /* This is now controlled by custom settings */
+  background: rgba(
+    88,
+    88,
+    88,
+    0.5
+  ); /* This is now controlled by custom settings */
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow-strong);
@@ -312,6 +322,129 @@ section {
   font-weight: 400;
 }
 
+/* Music Player Styles */
+.music-player-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+/* Ensure music button is properly positioned on mobile */
+@media (max-width: 768px) {
+  .music-player-container {
+    top: 1rem;
+    right: 1rem;
+    z-index: 1001; /* Higher z-index for mobile */
+  }
+
+  .music-player {
+    width: 280px; /* Slightly smaller on mobile */
+  }
+}
+
+/* For very small screens */
+@media (max-width: 480px) {
+  .music-player-container {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .music-player {
+    width: 250px;
+  }
+}
+
+.music-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-smooth);
+}
+
+.music-icon:hover {
+  transform: scale(1.05);
+}
+
+.music-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: #ffffff; /* Fixed white color for the music icon */
+}
+
+.music-player {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: var(--border-radius);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+  transition: var(--transition-smooth);
+  width: 300px;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.music-player.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+.player-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.player-title {
+  color: var(--accent-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.minimize-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minimize-btn svg {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
+.player-content {
+  padding: 1rem;
+}
+
+.youtube-iframe {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: none;
+  border-radius: 8px;
+}
+
+/* Share and Make Your Own buttons - only show on last section */
 .credits {
   position: fixed;
   color: rgba(255, 255, 255, 1);
@@ -332,6 +465,8 @@ section {
   justify-content: center;
   height: 2.5rem;
   line-height: 1;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .credits:hover {
@@ -361,6 +496,8 @@ section {
   width: 2.5rem;
   height: 2.5rem;
   transform: translateY(0);
+  opacity: 0;
+  visibility: hidden;
 }
 
 .share-icon {
@@ -371,6 +508,20 @@ section {
 
 .share-button:hover {
   opacity: 0.8;
+}
+
+/* Show buttons only on the last section */
+.section-9 .credits,
+.section-9 .share-button {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Show buttons when scrolled to bottom */
+body.last-section .credits,
+body.last-section .share-button {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Loading state */
@@ -461,100 +612,3 @@ section {
     --glass-bg: rgba(10, 10, 10, 0.9);
   }
 }
-
-/* Music Player Styles */
-.music-player-container {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-}
-
-.music-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: var(--transition-smooth);
-}
-
-.music-icon:hover {
-  transform: scale(1.05);
-}
-
-.music-icon svg {
-  width: 1.2rem;
-  height: 1.2rem;
-  fill: #ffffff; /* Fixed white color for the music icon */
-}
-
-.music-player {
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: var(--border-radius);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-  transition: var(--transition-smooth);
-  width: 300px;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-}
-
-.music-player.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: all;
-}
-
-.player-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 1rem;
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.player-title {
-  color: var(--accent-color);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.minimize-btn {
-  background: none;
-  border: none;
-  color: var(--accent-color);
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.minimize-btn svg {
-  width: 1rem;
-  height: 1rem;
-  fill: currentColor;
-}
-
-.player-content {
-  padding: 1rem;
-}
-
-.youtube-iframe {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border: none;
-  border-radius: 8px;
-} 

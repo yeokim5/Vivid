@@ -45,6 +45,9 @@
   margin-bottom: 20px;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .view-essay-btn:hover {
@@ -105,4 +108,4 @@
     padding: 12px 30px;
     font-size: 1.1rem;
   }
-} 
+}

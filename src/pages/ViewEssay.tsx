@@ -40,7 +40,10 @@ class ErrorBoundary extends React.Component<
 }
 
 // Essay iframe component
-const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({ html, onLoad }) => {
+const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({
+  html,
+  onLoad,
+}) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const navigate = useNavigate();
   const [isIframeLoading, setIsIframeLoading] = useState(true);
@@ -48,7 +51,8 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({ html, onL
   useEffect(() => {
     if (iframeRef.current) {
       const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      const iframeDoc =
+        iframe.contentDocument || iframe.contentWindow?.document;
 
       if (iframeDoc) {
         // First write a loading state
@@ -103,7 +107,7 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({ html, onL
           iframeDoc.close();
 
           // Add the styles after the document is initialized
-          const styleElement = iframeDoc.createElement('style');
+          const styleElement = iframeDoc.createElement("style");
           styleElement.textContent = `
             html, body {
               margin: 0 !important;
@@ -135,33 +139,37 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({ html, onL
           iframeDoc.head.appendChild(styleElement);
 
           // Setup event listeners
-          const creditsLink = iframeDoc.querySelector('.credits');
+          const creditsLink = iframeDoc.querySelector(".credits");
           if (creditsLink) {
-            creditsLink.addEventListener('click', (e) => {
+            creditsLink.addEventListener("click", (e) => {
               e.preventDefault();
-              navigate('/');
+              navigate("/");
             });
           }
 
           // Initialize music player state
-          const musicPlayer = iframeDoc.querySelector('.music-player');
-          const musicSvg = iframeDoc.querySelector('.music-svg') as SVGElement;
-          const minusSvg = iframeDoc.querySelector('.minus-svg') as SVGElement;
-          const youtubeIframe = iframeDoc.querySelector('.youtube-iframe') as HTMLIFrameElement;
-          
+          const musicPlayer = iframeDoc.querySelector(".music-player");
+          const musicSvg = iframeDoc.querySelector(".music-svg") as SVGElement;
+          const minusSvg = iframeDoc.querySelector(".minus-svg") as SVGElement;
+          const youtubeIframe = iframeDoc.querySelector(
+            ".youtube-iframe"
+          ) as HTMLIFrameElement;
+
           if (musicPlayer) {
-            musicPlayer.classList.remove('visible');
+            musicPlayer.classList.remove("visible");
           }
           if (musicSvg) {
-            musicSvg.style.display = 'block';
+            musicSvg.style.display = "block";
           }
           if (minusSvg) {
-            minusSvg.style.display = 'none';
+            minusSvg.style.display = "none";
           }
           if (youtubeIframe) {
             const currentSrc = youtubeIframe.src;
-            const separator = currentSrc.includes('?') ? '&' : '?';
-            youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0`;
+            if (currentSrc && !currentSrc.includes("autoplay=1")) {
+              const separator = currentSrc.includes("?") ? "&" : "?";
+              youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0&mute=0`;
+            }
           }
 
           setIsIframeLoading(false);
@@ -172,16 +180,16 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({ html, onL
   }, [html, navigate, onLoad]);
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
       <iframe
         ref={iframeRef}
         style={{
-          width: '100%',
-          height: '100vh',
-          border: 'none',
-          backgroundColor: '#0a0a0a',
+          width: "100%",
+          height: "100vh",
+          border: "none",
+          backgroundColor: "#0a0a0a",
           opacity: isIframeLoading ? 0 : 1,
-          transition: 'opacity 0.3s ease-in-out'
+          transition: "opacity 0.3s ease-in-out",
         }}
         title="Essay Content"
       />
@@ -201,21 +209,26 @@ const ViewEssay: React.FC = () => {
 
       try {
         // Track view count
-        const viewTrackingKey = 'viewedEssays';
+        const viewTrackingKey = "viewedEssays";
         const now = Date.now();
-        const viewedEssays = JSON.parse(localStorage.getItem(viewTrackingKey) || '{}');
+        const viewedEssays = JSON.parse(
+          localStorage.getItem(viewTrackingKey) || "{}"
+        );
         const lastView = viewedEssays[id];
-        const hasRecentView = lastView && (now - lastView) < 24 * 60 * 60 * 1000; // 24 hours
+        const hasRecentView = lastView && now - lastView < 24 * 60 * 60 * 1000; // 24 hours
 
         if (!hasRecentView) {
           try {
             const response = await fetch(`${API_URL}/essays/${id}/view`, {
-              method: 'POST'
+              method: "POST",
             });
-            
+
             if (response.ok) {
               viewedEssays[id] = now;
-              localStorage.setItem(viewTrackingKey, JSON.stringify(viewedEssays));
+              localStorage.setItem(
+                viewTrackingKey,
+                JSON.stringify(viewedEssays)
+              );
             }
           } catch (error) {
             console.error("Failed to increment view count:", error);
@@ -257,16 +270,19 @@ const ViewEssay: React.FC = () => {
   }
 
   return (
-    <div className="view-essay-container" style={{
-      overflow: 'hidden',
-      height: '100vh',
-      width: '100%',
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0
-    }}>
+    <div
+      className="view-essay-container"
+      style={{
+        overflow: "hidden",
+        height: "100vh",
+        width: "100%",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+      }}
+    >
       <ErrorBoundary>
         {html && <EssayIframe html={html} onLoad={() => setLoading(false)} />}
       </ErrorBoundary>
@@ -274,4 +290,4 @@ const ViewEssay: React.FC = () => {
   );
 };
 
-export default ViewEssay; 
+export default ViewEssay;

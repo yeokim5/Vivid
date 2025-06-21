@@ -13,24 +13,30 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   onClose,
   essayViewUrl,
 }) => {
+  const handleViewEssay = () => {
+    // Open in the same tab to ensure autoplay works
+    window.location.href = essayViewUrl;
+  };
+
   return (
-    <FullScreenModal isOpen={isOpen} onClose={onClose} title="Essay Created Successfully!">
+    <FullScreenModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Essay Created Successfully!"
+    >
       <div className="success-modal">
         <div className="success-content">
           <div className="success-icon">✨</div>
-          <h2>Your essay has been transformed into a beautiful visual experience!</h2>
-          <a
-            href={essayViewUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="view-essay-btn"
-          >
+          <h2>
+            Your essay has been transformed into a beautiful visual experience!
+          </h2>
+          <button onClick={handleViewEssay} className="view-essay-btn">
             View Your Essay
-          </a>
+          </button>
         </div>
       </div>
     </FullScreenModal>
   );
 };
 
-export default SuccessModal; 
+export default SuccessModal;
