@@ -14,7 +14,7 @@ body {
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-family, "Inter"), sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
   overflow-x: hidden;
@@ -63,7 +63,7 @@ header .bg-overlay {
 }
 
 h1 {
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-family, "Playfair Display"), serif;
   font-size: clamp(2.5rem, 8vw, 7rem);
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -76,7 +76,7 @@ h1 {
 }
 
 h2 {
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-family, "Playfair Display"), serif;
   font-size: clamp(1.5rem, 5vw, 3rem);
   font-weight: 500;
   margin-bottom: 1.5rem;
@@ -89,7 +89,7 @@ h2 {
 }
 
 .author {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-family, "Inter"), sans-serif;
   font-size: clamp(1rem, 2vw, 1.5rem);
   font-style: italic;
   font-weight: 400;
@@ -192,7 +192,7 @@ section {
 
 .quote {
   max-width: min(900px, 90vw);
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-family, "Playfair Display"), serif;
   font-size: clamp(1.25rem, 3.5vw, 2.5rem);
   line-height: 1.4;
   position: relative;
@@ -266,6 +266,7 @@ section {
   word-break: normal;
   text-align: center;
   text-align-last: center;
+  font-family: inherit; /* Explicitly inherit from parent .quote */
 }
 
 @media (max-width: 768px) {
@@ -279,6 +280,17 @@ section {
 
 .quote span {
   display: inline-block;
+  font-family: inherit; /* Ensure spans inherit font */
+}
+
+/* Ensure all text elements within quotes use the correct font */
+.quote,
+.quote *,
+.quote .line,
+.quote span,
+.quote p,
+.quote div {
+  font-family: var(--font-family, "Playfair Display"), serif !important;
 }
 
 .highlight {
@@ -314,7 +326,7 @@ section {
 }
 
 .final-quote {
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-family, "Playfair Display"), serif;
   font-style: italic;
   font-size: clamp(1.5rem, 3vw, 2.5rem);
   max-width: 800px;

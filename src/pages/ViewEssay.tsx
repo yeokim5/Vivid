@@ -102,41 +102,143 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({
 
         // Then load the actual content after a short delay
         setTimeout(() => {
+          // First, inject critical CSS to prevent FOUC
+          const criticalCss = `
+            <style>
+              /* Critical CSS to prevent flash of unstyled content */
+              html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                height: 100% !important;
+                width: 100% !important;
+                background-color: #0a0a0a !important;
+                color: #f8f9fa !important;
+                /* Hide scrollbar but keep scrolling */
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+                visibility: hidden !important; /* Hide until stylesheets load */
+              }
+              html::-webkit-scrollbar, body::-webkit-scrollbar {
+                display: none !important;
+              }
+              
+              /* Show loading until everything is ready */
+              .loading {
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background-color: #0a0a0a !important;
+                color: #f8f9fa !important;
+                font-size: 1.5rem !important;
+                z-index: 10000 !important;
+                visibility: visible !important;
+              }
+              
+              /* Hide all content initially */
+              header, section, .smooth-wrapper {
+                visibility: hidden !important;
+                opacity: 0 !important;
+              }
+              
+              #essay-container {
+                height: 100vh !important;
+                width: 100vw !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+              }
+              #essay-container::-webkit-scrollbar {
+                display: none !important;
+              }
+              #essay-container section {
+                height: 100vh !important;
+                width: 100vw !important;
+              }
+            </style>
+          `;
+
+          // Inject the critical CSS into the HTML before writing
+          const htmlWithCriticalCss = html.replace(
+            "<head>",
+            `<head>${criticalCss}`
+          );
+
           iframeDoc.open();
-          iframeDoc.write(html);
+          iframeDoc.write(htmlWithCriticalCss);
           iframeDoc.close();
 
-          // Add the styles after the document is initialized
-          const styleElement = iframeDoc.createElement("style");
-          styleElement.textContent = `
-            html, body {
-              margin: 0 !important;
-              padding: 0 !important;
-              height: 100% !important;
-              width: 100% !important;
-              /* Hide scrollbar but keep scrolling */
-              scrollbar-width: none !important; /* Firefox */
-              -ms-overflow-style: none !important; /* IE and Edge */
-            }
-            html::-webkit-scrollbar, body::-webkit-scrollbar {
-              display: none !important; /* Chrome, Safari, Opera */
-            }
-            #essay-container {
-              height: 100vh !important;
-              width: 100vw !important;
-              /* Hide scrollbar but keep scrolling */
-              scrollbar-width: none !important;
-              -ms-overflow-style: none !important;
-            }
-            #essay-container::-webkit-scrollbar {
-              display: none !important;
-            }
-            #essay-container section {
-              height: 100vh !important;
-              width: 100vw !important;
-            }
-          `;
-          iframeDoc.head.appendChild(styleElement);
+          // Use a simpler approach - wait for load events and use a reasonable timeout
+          let stylesheetsLoaded = 0;
+          const stylesheets = Array.from(
+            iframeDoc.querySelectorAll('link[rel="stylesheet"]')
+          ) as HTMLLinkElement[];
+
+          const showContent = () => {
+            // Show the content
+            const showContentStyle = iframeDoc.createElement("style");
+            showContentStyle.textContent = `
+              body {
+                visibility: visible !important;
+              }
+              header, section, .smooth-wrapper {
+                visibility: visible !important;
+                opacity: 1 !important;
+                transition: opacity 0.3s ease-in-out !important;
+              }
+            `;
+            iframeDoc.head.appendChild(showContentStyle);
+
+            // Remove loading after a brief delay to ensure smooth transition
+            setTimeout(() => {
+              const loadingElement = iframeDoc.querySelector(
+                ".loading"
+              ) as HTMLElement;
+              if (loadingElement) {
+                loadingElement.style.opacity = "0";
+                loadingElement.style.transition = "opacity 0.5s ease";
+                setTimeout(() => {
+                  if (loadingElement.parentNode) {
+                    loadingElement.parentNode.removeChild(loadingElement);
+                  }
+                }, 500);
+              }
+            }, 100);
+          };
+
+          if (stylesheets.length === 0) {
+            // No external stylesheets, show content immediately
+            setTimeout(showContent, 200);
+          } else {
+            // Listen for load events on stylesheets
+            stylesheets.forEach((link) => {
+              const handleLoad = () => {
+                stylesheetsLoaded++;
+                if (stylesheetsLoaded >= stylesheets.length) {
+                  showContent();
+                }
+              };
+
+              if (link.sheet) {
+                // Already loaded
+                handleLoad();
+              } else {
+                link.addEventListener("load", handleLoad);
+                link.addEventListener("error", handleLoad); // Treat errors as loaded to avoid hanging
+              }
+            });
+
+            // Fallback timeout - show content after 2 seconds regardless
+            setTimeout(() => {
+              console.log(
+                `Showing content after timeout. Loaded: ${stylesheetsLoaded}/${stylesheets.length} stylesheets`
+              );
+              showContent();
+            }, 2000);
+          }
 
           // Setup event listeners
           const creditsLink = iframeDoc.querySelector(".credits");
