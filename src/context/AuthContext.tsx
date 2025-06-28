@@ -25,13 +25,14 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   updateUserCredits: (credits: number) => void;
+  syncUserFromToken: (token?: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 const AUTO_LOGOUT_TIME = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-const LOGIN_TIMESTAMP_KEY = 'vivid_loginTimestamp';
+const LOGIN_TIMESTAMP_KEY = "vivid_loginTimestamp";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -56,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       logout();
     }, AUTO_LOGOUT_TIME);
     setLogoutTimer(timer);
-    
+
     // Store login timestamp
     localStorage.setItem(LOGIN_TIMESTAMP_KEY, Date.now().toString());
   };
@@ -82,54 +83,95 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
+    // Function to restore user from existing token
+    const restoreUserFromToken = async () => {
+      const token = localStorage.getItem("auth_token");
+      if (token) {
         try {
-          // Send user data to backend
-          const response = await axios.post(
-            `${API_URL}/auth/firebase-login`,
-            {
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              name: firebaseUser.displayName,
-              photoURL: firebaseUser.photoURL,
-            }
-          );
+          // Verify token with backend and get current user
+          const response = await axios.get(`${API_URL}/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
 
-          // Save JWT token from our backend
-          localStorage.setItem("auth_token", response.data.token);
-
-          // Set user data
-          setUser(response.data.user);
-          
-          // Set up auto logout timer
+          // Set user data from token
+          setUser(response.data);
           setupAutoLogout();
+          return true;
         } catch (err) {
-          console.error("Error authenticating with backend:", err);
-          setError("Failed to authenticate with server");
+          console.error("Error restoring user from token:", err);
+          // Token is invalid, remove it
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
+          return false;
         }
-      } else {
-        // User is signed out
-        localStorage.removeItem("auth_token");
-        localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
-        setUser(null);
+      }
+      return false;
+    };
+
+    // Try to restore user from token first
+    const initializeAuth = async () => {
+      const tokenRestored = await restoreUserFromToken();
+
+      // Set up Firebase auth state listener
+      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        if (firebaseUser) {
+          // Only proceed with Firebase login if we don't already have a valid token
+          if (!tokenRestored) {
+            try {
+              // Send user data to backend
+              const response = await axios.post(
+                `${API_URL}/auth/firebase-login`,
+                {
+                  uid: firebaseUser.uid,
+                  email: firebaseUser.email,
+                  name: firebaseUser.displayName,
+                  photoURL: firebaseUser.photoURL,
+                }
+              );
+
+              // Save JWT token from our backend
+              localStorage.setItem("auth_token", response.data.token);
+
+              // Set user data
+              setUser(response.data.user);
+
+              // Set up auto logout timer
+              setupAutoLogout();
+            } catch (err) {
+              console.error("Error authenticating with backend:", err);
+              setError("Failed to authenticate with server");
+            }
+          }
+        } else {
+          // User is signed out from Firebase, clear everything
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
+          setUser(null);
+          clearLogoutTimer();
+        }
+        setLoading(false);
+      });
+
+      // Set up interval to check login expiration
+      const expirationCheckInterval = setInterval(() => {
+        if (checkLoginExpiration()) {
+          clearInterval(expirationCheckInterval);
+        }
+      }, 1000); // Check every second
+
+      // Cleanup subscription, timer, and interval
+      return () => {
+        unsubscribe();
         clearLogoutTimer();
-      }
-      setLoading(false);
-    });
-
-    // Set up interval to check login expiration
-    const expirationCheckInterval = setInterval(() => {
-      if (checkLoginExpiration()) {
         clearInterval(expirationCheckInterval);
-      }
-    }, 1000); // Check every second
+      };
+    };
 
-    // Cleanup subscription, timer, and interval
+    const cleanup = initializeAuth();
     return () => {
-      unsubscribe();
-      clearLogoutTimer();
-      clearInterval(expirationCheckInterval);
+      cleanup.then((cleanupFn) => cleanupFn && cleanupFn());
     };
   }, []);
 
@@ -202,9 +244,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (user) {
       setUser({
         ...user,
-        credits
+        credits,
       });
     }
+  };
+
+  // Function to manually sync user state (useful for AuthCallback)
+  const syncUserFromToken = async (token?: string) => {
+    const authToken = token || localStorage.getItem("auth_token");
+    if (authToken) {
+      try {
+        const response = await axios.get(`${API_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+
+        setUser(response.data);
+        setupAutoLogout();
+        setLoading(false);
+        return true;
+      } catch (err) {
+        console.error("Error syncing user from token:", err);
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
+        setUser(null);
+        setLoading(false);
+        return false;
+      }
+    }
+    setLoading(false);
+    return false;
   };
 
   const value = {
@@ -214,7 +284,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     login,
     logout,
     isAuthenticated: !!user,
-    updateUserCredits
+    updateUserCredits,
+    syncUserFromToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

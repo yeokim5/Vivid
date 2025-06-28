@@ -1,9 +1,11 @@
 import React, { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { syncUserFromToken } = useAuth();
 
   useEffect(() => {
     // Get token from URL query parameters
@@ -21,13 +23,21 @@ const AuthCallback: React.FC = () => {
       // Save token to localStorage
       localStorage.setItem("auth_token", token);
 
-      // Redirect to home page or dashboard
-      navigate("/");
+      // Sync user state with the AuthContext
+      syncUserFromToken(token).then((success) => {
+        if (success) {
+          // Redirect to home page after successful sync
+          navigate("/");
+        } else {
+          // Token was invalid, redirect to login
+          navigate("/login?error=invalid_token");
+        }
+      });
     } else {
       // No token found, redirect to login
       navigate("/login?error=no_token");
     }
-  }, [location, navigate]);
+  }, [location, navigate, syncUserFromToken]);
 
   return (
     <div className="auth-callback">
