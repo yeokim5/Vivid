@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import LandingPage from "./pages/LandingPage";
 import About from "./pages/About";
 import AuthCallback from "./pages/AuthCallback";
@@ -9,32 +9,54 @@ import ViewEssay from "./pages/ViewEssay";
 import Essays from "./pages/Essays";
 import UserEssays from "./pages/UserEssays";
 import StripeProvider from "./components/StripeProvider";
+import WelcomeModal from "./components/WelcomeModal";
+import ModalPortal from "./components/ModalPortal";
 import "./styles/App.css";
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const location = useLocation();
-  const isEssayView = location.pathname.startsWith('/essay/') || location.pathname.startsWith('/essays/');
+  const { user, showWelcomeModal, setShowWelcomeModal } = useAuth();
+  const isEssayView =
+    location.pathname.startsWith("/essay/") ||
+    location.pathname.startsWith("/essays/");
 
   return (
+    <StripeProvider>
+      <div className="App">
+        <Routes location={location}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/essays" element={<Essays />} />
+          <Route path="/my-essays" element={<UserEssays />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/essay/:id" element={<ViewEssay />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        {!isEssayView && (
+          <footer>
+            <p>&copy; {new Date().getFullYear()} Vivid</p>
+          </footer>
+        )}
+
+        {/* Welcome Modal for new users */}
+        {showWelcomeModal && user && (
+          <ModalPortal>
+            <WelcomeModal
+              isOpen={showWelcomeModal}
+              onClose={() => setShowWelcomeModal(false)}
+              userName={user.name}
+            />
+          </ModalPortal>
+        )}
+      </div>
+    </StripeProvider>
+  );
+};
+
+const App: React.FC = () => {
+  return (
     <AuthProvider>
-      <StripeProvider>
-        <div className="App">
-          <Routes location={location}>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/essays" element={<Essays />} />
-            <Route path="/my-essays" element={<UserEssays />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/essay/:id" element={<ViewEssay />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          {!isEssayView && (
-            <footer>
-              <p>&copy; {new Date().getFullYear()} Vivid</p>
-            </footer>
-          )}
-        </div>
-      </StripeProvider>
+      <AppContent />
     </AuthProvider>
   );
 };

@@ -12,15 +12,23 @@ const Navbar: React.FC = () => {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const { user, isAuthenticated, login, logout } = useAuth();
 
+  // Debug: Log auth state changes
+  useEffect(() => {
+    console.log("Navbar - Auth state changed:", {
+      isAuthenticated,
+      user: !!user,
+    });
+  }, [isAuthenticated, user]);
+
   // Debounced scroll handler for better performance
   useEffect(() => {
     let scrollTimer: number | null = null;
-    
+
     const handleScroll = () => {
       if (scrollTimer !== null) {
         window.cancelAnimationFrame(scrollTimer);
       }
-      
+
       scrollTimer = window.requestAnimationFrame(() => {
         setScrolled(window.scrollY > 50);
       });
@@ -37,19 +45,19 @@ const Navbar: React.FC = () => {
 
   // Use memoized toggle handler
   const toggleMenu = useCallback(() => {
-    setMenuOpen(prev => !prev);
-    
+    setMenuOpen((prev) => !prev);
+
     // Prevent body scrolling when menu is open
     if (!menuOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
   }, [menuOpen]);
 
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
-    document.body.style.overflow = '';
+    document.body.style.overflow = "";
   }, []);
 
   const handleAuthAction = useCallback(() => {
@@ -69,7 +77,7 @@ const Navbar: React.FC = () => {
     <>
       <nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
         <div className="navbar-container">
-          <Link to="/" className="navbar-logo" style={{fontFamily: "Ariel"}}>
+          <Link to="/" className="navbar-logo" style={{ fontFamily: "Ariel" }}>
             Vivid
           </Link>
 
@@ -84,11 +92,7 @@ const Navbar: React.FC = () => {
 
           <ul className={`nav-menu ${menuOpen ? "active" : ""}`}>
             <li className="nav-item">
-              <Link
-                to="/essays"
-                className="nav-link"
-                onClick={closeMenu}
-              >
+              <Link to="/essays" className="nav-link" onClick={closeMenu}>
                 Explore
               </Link>
             </li>
@@ -105,7 +109,7 @@ const Navbar: React.FC = () => {
                     <div className="logout-menu">
                       <div className="profile-menu-item credits-display">
                         Credits: {user?.credits || 0}
-                        <button 
+                        <button
                           className="buy-credits-btn"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -116,8 +120,8 @@ const Navbar: React.FC = () => {
                           Buy Credits
                         </button>
                       </div>
-                      <Link 
-                        to="/my-essays" 
+                      <Link
+                        to="/my-essays"
                         className="profile-menu-item"
                         onClick={() => setShowLogoutMenu(false)}
                       >
@@ -151,7 +155,7 @@ const Navbar: React.FC = () => {
           </ul>
         </div>
       </nav>
-      
+
       {/* Purchase Credits Modal - rendered outside the navbar using Portal */}
       {showPurchaseModal && user && (
         <ModalPortal>

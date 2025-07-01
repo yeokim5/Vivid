@@ -5,13 +5,14 @@ import { useAuth } from "../context/AuthContext";
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { syncUserFromToken } = useAuth();
+  const { syncUserFromToken, setShowWelcomeModal } = useAuth();
 
   useEffect(() => {
     // Get token from URL query parameters
     const params = new URLSearchParams(location.search);
     const token = params.get("token");
     const error = params.get("error");
+    const isNewUser = params.get("isNewUser") === "true";
 
     if (error) {
       console.error("Authentication error:", error);
@@ -26,6 +27,10 @@ const AuthCallback: React.FC = () => {
       // Sync user state with the AuthContext
       syncUserFromToken(token).then((success) => {
         if (success) {
+          // Show welcome modal if this is a new user
+          if (isNewUser) {
+            setShowWelcomeModal(true);
+          }
           // Redirect to home page after successful sync
           navigate("/");
         } else {

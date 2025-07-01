@@ -26,6 +26,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   updateUserCredits: (credits: number) => void;
   syncUserFromToken: (token?: string) => Promise<boolean>;
+  showWelcomeModal: boolean;
+  setShowWelcomeModal: (show: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [logoutTimer, setLogoutTimer] = useState<NodeJS.Timeout | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   // Function to clear the logout timer
   const clearLogoutTimer = () => {
@@ -97,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
           // Set user data from token
           setUser(response.data);
+          console.log("User restored from token:", response.data);
           setupAutoLogout();
           return true;
         } catch (err) {
@@ -104,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           // Token is invalid, remove it
           localStorage.removeItem("auth_token");
           localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
+          setUser(null); // Explicitly set user to null
           return false;
         }
       }
@@ -112,13 +117,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Try to restore user from token first
     const initializeAuth = async () => {
+      console.log("Initializing authentication...");
       const tokenRestored = await restoreUserFromToken();
+      console.log("Token restored:", tokenRestored);
 
       // Set up Firebase auth state listener
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        console.log("Firebase auth state changed:", !!firebaseUser);
         if (firebaseUser) {
-          // Only proceed with Firebase login if we don't already have a valid token
-          if (!tokenRestored) {
+          // Always check if we need to authenticate with backend
+          if (!tokenRestored || !user) {
             try {
               // Send user data to backend
               const response = await axios.post(
@@ -137,8 +145,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               // Set user data
               setUser(response.data.user);
 
+              // Show welcome modal if this is a new user
+              if (response.data.isNewUser) {
+                setShowWelcomeModal(true);
+              }
+
               // Set up auto logout timer
               setupAutoLogout();
+
+              console.log(
+                "User authenticated and state updated:",
+                response.data.user
+              );
             } catch (err) {
               console.error("Error authenticating with backend:", err);
               setError("Failed to authenticate with server");
@@ -178,6 +196,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async () => {
     try {
       setLoading(true);
+      setError(null); // Clear any previous errors
       const provider = new GoogleAuthProvider();
 
       // Set custom parameters for the Google provider
@@ -207,7 +226,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (styleElement) document.head.removeChild(styleElement);
 
       // The sign-in was successful
-      console.log("Google sign-in successful");
+      console.log(
+        "Google sign-in successful, waiting for auth state update..."
+      );
+
+      // Don't set loading to false here - let the onAuthStateChanged handler do it
+      // This ensures the UI stays in loading state until the user data is fully loaded
     } catch (err) {
       // Remove the style if there was an error
       const styleElement = document.getElementById("google-popup-style");
@@ -286,6 +310,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isAuthenticated: !!user,
     updateUserCredits,
     syncUserFromToken,
+    showWelcomeModal,
+    setShowWelcomeModal,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

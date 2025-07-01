@@ -1,0 +1,238 @@
+.welcome-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.welcome-modal {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa);
+  border-radius: 24px;
+  width: 90%;
+  max-width: 500px;
+  padding: 40px 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  animation: scaleIn 0.3s ease;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.close-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #333;
+  transform: scale(1.1);
+}
+
+.welcome-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.welcome-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: bounce 2s infinite;
+}
+
+.welcome-modal h2 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+  color: #333;
+  background: linear-gradient(135deg, #5d5fe2, #9867f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.welcome-message {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+.credit-gift {
+  background: linear-gradient(
+    135deg,
+    rgba(93, 95, 226, 0.1),
+    rgba(152, 103, 240, 0.1)
+  );
+  border: 2px solid rgba(93, 95, 226, 0.2);
+  border-radius: 16px;
+  padding: 25px;
+  margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.credit-icon {
+  font-size: 2.5rem;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.credit-info {
+  text-align: left;
+  flex: 1;
+}
+
+.credit-info h3 {
+  font-size: 1.3rem;
+  color: #5d5fe2;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.credit-info p {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.get-started-btn {
+  background: linear-gradient(135deg, #5d5fe2, #9867f0);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 20px rgba(93, 95, 226, 0.25);
+  min-width: 160px;
+}
+
+.get-started-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(93, 95, 226, 0.35);
+  background: linear-gradient(135deg, #4a4cd1, #8555e0);
+}
+
+.get-started-btn:active {
+  transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40%,
+  43% {
+    transform: translateY(-15px);
+  }
+  70% {
+    transform: translateY(-7px);
+  }
+  90% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: scale(1.1) rotate(90deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scale(1.1) rotate(270deg);
+    opacity: 0.8;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .welcome-modal {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .welcome-modal h2 {
+    font-size: 1.6rem;
+  }
+
+  .welcome-message {
+    font-size: 1rem;
+  }
+
+  .credit-gift {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .credit-info {
+    text-align: center;
+  }
+
+  .get-started-btn {
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+}
