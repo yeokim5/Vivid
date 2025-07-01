@@ -4,9 +4,12 @@ import ImageSelectionFlow from "./ImageSelectionFlow";
 import SuccessModal from "./SuccessModal";
 import PurchaseCreditsModal from "./PurchaseCreditsModal";
 import ModalPortal from "./ModalPortal";
+import QueueModal from "./QueueModal";
 import { useAuth } from "../context/AuthContext";
 import { createApiUrl, getAuthHeaders, API_CONFIG } from "../config/api";
 import { DEFAULT_STYLES } from "../constants/styles";
+
+type HeadersInit = Record<string, string> | Headers;
 
 interface VividGeneratorProps {
   title: string;
@@ -69,6 +72,8 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
   const [essayViewUrl, setEssayViewUrl] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showQueueModal, setShowQueueModal] = useState(false);
+  const [queueItemId, setQueueItemId] = useState<string | null>(null);
 
   const validateInput = () => {
     if (!title.trim()) {
@@ -109,26 +114,22 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
     }
   };
 
-  const handleMakeVivid = async () => {
-    if (!isAuthenticated || !user) {
-      setError("Please sign in to use the Make it Vivid feature");
-      return;
-    }
-    if (user.credits <= 0) {
-      setError("You don't have enough credits to use this feature");
-      return;
-    }
-    if (!validateInput()) {
-      return;
-    }
-    setIsLoading(true);
+  const processEssay = async () => {
     try {
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error("Not authenticated. Please log in to create an essay.");
+      }
+
       // Step 1: Divide into sections
       const response = await fetch(
         createApiUrl(API_CONFIG.ENDPOINTS.SECTIONS.DIVIDE),
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...authHeaders,
+          },
           body: JSON.stringify({ title, content }),
         }
       );
@@ -158,7 +159,6 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
       };
       setResult(updatedResult);
       // Create essay
-      const authHeaders = getAuthHeaders();
       if (!authHeaders.Authorization)
         throw new Error("Not authenticated. Please log in to create an essay.");
       const youtubeVideoCode = extractYoutubeVideoCode(youtubeUrl);
@@ -223,6 +223,19 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         setEssayCreated(true);
         setEssayViewUrl(`/essay/${essayData.essayId}`);
         setShowSuccessModal(true);
+
+        // Complete processing in queue (only if we have a queue item or were processing)
+        if (queueItemId || isLoading) {
+          console.log("[VIVID GENERATOR] Completing queue processing");
+          await fetch(createApiUrl("/queue/complete"), {
+            method: "POST",
+            headers: authHeaders,
+          });
+        }
+
+        // Clear queue state since processing is complete
+        setQueueItemId(null);
+        setShowQueueModal(false);
       } else {
         throw new Error(essayData.message || "Failed to create essay");
       }
@@ -231,13 +244,185 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         err instanceof Error ? err.message : "An unknown error occurred"
       );
       console.error("Error in Vivid Generator:", err);
+
+      // Complete processing on error (cleanup) - only if we were actually processing
+      if (queueItemId || isLoading) {
+        try {
+          console.log(
+            "[VIVID GENERATOR] Cleaning up queue processing after error"
+          );
+          const cleanupHeaders = getAuthHeaders();
+          await fetch(createApiUrl("/queue/complete"), {
+            method: "POST",
+            headers: cleanupHeaders as HeadersInit,
+          });
+
+          // Clear queue state after cleanup
+          setQueueItemId(null);
+          setShowQueueModal(false);
+        } catch (cleanupErr) {
+          console.error("Error cleaning up queue:", cleanupErr);
+        }
+      }
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMakeVivid = async () => {
+    if (!isAuthenticated || !user) {
+      setError("Please sign in to use the Make it Vivid feature");
+      return;
+    }
+    if (user.credits <= 0) {
+      setError("You don't have enough credits to use this feature");
+      return;
+    }
+    if (!validateInput()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Step 1: Check rate limit and queue status
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error("Not authenticated. Please log in to create an essay.");
+      }
+
+      const queueResponse = await fetch(createApiUrl("/queue/check"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        body: JSON.stringify({ title, content }),
+      });
+
+      if (!queueResponse.ok) {
+        throw new Error("Failed to check queue status");
+      }
+
+      const queueData = await queueResponse.json();
+
+      if (!queueData.success) {
+        throw new Error(queueData.message || "Failed to check queue status");
+      }
+
+      // If can't process immediately, show queue modal
+      if (!queueData.data.canProcess) {
+        setQueueItemId(queueData.data.queueItemId || null);
+        setIsLoading(false);
+        setShowQueueModal(true);
+        return;
+      }
+
+      // Step 2: For immediate processing, tryStartImmediateProcessing already started it
+      // Skip /queue/start call and go directly to essay processing
+      await processEssay();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred"
+      );
       setIsLoading(false);
     }
   };
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
+  };
+
+  const handleCloseQueueModal = () => {
+    setShowQueueModal(false);
+    setQueueItemId(null);
+  };
+
+  const handleQueueReadyToProcess = async () => {
+    setShowQueueModal(false);
+    setIsLoading(true); // Start loading immediately to prevent double-clicks
+
+    try {
+      // For queued tabs, we need to call /queue/start when their turn comes
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        throw new Error("Not authenticated");
+      }
+
+      console.log("[VIVID GENERATOR] Attempting to start queue processing...");
+      const startResponse = await fetch(createApiUrl("/queue/start"), {
+        method: "POST",
+        headers: authHeaders,
+      });
+
+      if (!startResponse.ok) {
+        const errorData = await startResponse.json().catch(() => null);
+        console.error("[VIVID GENERATOR] Start processing failed:", errorData);
+
+        if (errorData?.debug) {
+          console.log("[VIVID GENERATOR] Debug info:", errorData.debug);
+        }
+
+        // Don't retry - just throw the error immediately
+        // The queue system should be precise enough now that retries aren't needed
+        throw new Error(errorData?.message || "Failed to start processing");
+      } else {
+        console.log("[VIVID GENERATOR] Queue processing started successfully");
+      }
+
+      // Continue with essay generation
+      await processEssay();
+    } catch (err) {
+      console.error("Error starting queued processing:", err);
+      setError(
+        err instanceof Error ? err.message : "Failed to start processing"
+      );
+      setIsLoading(false); // Reset loading state on error
+    }
+  };
+
+  const handleRejoinQueue = async () => {
+    try {
+      const authHeaders = getAuthHeaders();
+      if (!authHeaders.Authorization) {
+        setError("Authentication required");
+        return;
+      }
+
+      const queueResponse = await fetch(createApiUrl("/queue/check"), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+        },
+        body: JSON.stringify({ title, content }),
+      });
+
+      if (!queueResponse.ok) {
+        throw new Error("Failed to rejoin queue");
+      }
+
+      const queueData = await queueResponse.json();
+
+      if (!queueData.success) {
+        throw new Error(queueData.message || "Failed to rejoin queue");
+      }
+
+      // Update with new queue item ID
+      if (queueData.data.queueItemId) {
+        setQueueItemId(queueData.data.queueItemId);
+      }
+
+      // If can process immediately after rejoining
+      if (queueData.data.canProcess) {
+        setShowQueueModal(false);
+        await processEssay();
+      }
+    } catch (err) {
+      console.error("Error rejoining queue:", err);
+      setError(err instanceof Error ? err.message : "Failed to rejoin queue");
+    }
   };
 
   const handleButtonClick = async () => {
@@ -288,6 +473,20 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
             isOpen={showPurchaseModal}
             onClose={() => setShowPurchaseModal(false)}
             currentCredits={user.credits}
+          />
+        </ModalPortal>
+      )}
+
+      {showQueueModal && (
+        <ModalPortal>
+          <QueueModal
+            isOpen={showQueueModal}
+            onClose={handleCloseQueueModal}
+            onReadyToProcess={handleQueueReadyToProcess}
+            onRejoinQueue={handleRejoinQueue}
+            title={title}
+            content={content}
+            queueItemId={queueItemId}
           />
         </ModalPortal>
       )}
