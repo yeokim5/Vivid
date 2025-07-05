@@ -271,11 +271,82 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({
             const isMobile = /iPhone|iPad|iPod|Android/i.test(
               navigator.userAgent
             );
+            const isInAppBrowser = /FBAN|FBAV|Instagram|Line|Pinterest|wv/.test(
+              navigator.userAgent
+            );
 
-            if (isMobile) {
-              // On mobile, just ensure the iframe has the correct src without extra parameters
+            // Get the video ID from the src
+            let videoId = "";
+            const srcUrl = youtubeIframe.src;
+            if (srcUrl.includes("embed/")) {
+              videoId = srcUrl.split("embed/")[1].split("?")[0];
+            }
+
+            // Create a fallback container next to the iframe
+            const playerContent = youtubeIframe.parentElement;
+            if (
+              playerContent &&
+              !playerContent.querySelector(".youtube-fallback")
+            ) {
+              const fallbackDiv = document.createElement("div");
+              fallbackDiv.className = "youtube-fallback";
+              fallbackDiv.style.display = "none";
+              fallbackDiv.style.textAlign = "center";
+              fallbackDiv.style.padding = "10px";
+              fallbackDiv.style.marginTop = "10px";
+              fallbackDiv.style.color = "#fff";
+              fallbackDiv.innerHTML = `
+                <p>Video not playing? Try these options:</p>
+                <a href="https://www.youtube.com/watch?v=${videoId}" target="_blank" style="color: #fff; background: rgba(255,0,0,0.7); padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-block; margin: 5px;">
+                  Open in YouTube
+                </a>
+              `;
+              playerContent.appendChild(fallbackDiv);
+            }
+
+            if (isMobile || isInAppBrowser) {
+              // On mobile or in-app browsers, add a timeout to check if video loads
+
+              // Try to detect if the video is actually playing
+              const checkVideoPlayback = () => {
+                // If we're in an in-app browser, show fallback immediately
+                if (isInAppBrowser) {
+                  const fallback = iframeDoc.querySelector(".youtube-fallback");
+                  if (fallback)
+                    (fallback as HTMLElement).style.display = "block";
+                  return;
+                }
+
+                // For regular mobile browsers, check if iframe is empty or showing an error
+                try {
+                  // Try to access iframe content - if blocked, it will throw an error
+                  const iframeVideoDoc =
+                    youtubeIframe.contentDocument ||
+                    youtubeIframe.contentWindow?.document;
+                  if (!iframeVideoDoc) {
+                    // Can't access iframe content - likely blocked
+                    const fallback =
+                      iframeDoc.querySelector(".youtube-fallback");
+                    if (fallback)
+                      (fallback as HTMLElement).style.display = "block";
+                  }
+                } catch (e) {
+                  // Cross-origin error - can't check directly
+                  // Instead, check if iframe has a reasonable height
+                  if (youtubeIframe.offsetHeight < 50) {
+                    const fallback =
+                      iframeDoc.querySelector(".youtube-fallback");
+                    if (fallback)
+                      (fallback as HTMLElement).style.display = "block";
+                  }
+                }
+              };
+
+              // Check after a delay to allow video to load
+              setTimeout(checkVideoPlayback, 3000);
+
+              // On mobile, use a clean URL without parameters
               if (youtubeIframe.src.includes("?")) {
-                // Remove any parameters and use just the base URL
                 youtubeIframe.src = youtubeIframe.src.split("?")[0];
               }
             } else {
