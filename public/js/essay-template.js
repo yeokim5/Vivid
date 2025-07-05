@@ -154,27 +154,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Ensure autoplay works - try to play the video after a short delay
   if (youtubeIframe) {
-    // First, try to force load the iframe
-    youtubeIframe.addEventListener("load", function () {
-      // After iframe loads, try to ensure playback works
-      if (youtubeIframe.src.indexOf("autoplay=1") === -1) {
-        const currentSrc = youtubeIframe.src;
-        const separator = currentSrc.includes("?") ? "&" : "?";
-        youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0&origin=${encodeURIComponent(
-          window.location.origin
-        )}&modestbranding=1&fs=1`;
-      }
-    });
-
-    // Also try the delayed approach as backup
+    // For mobile compatibility, we'll use a simpler approach
     setTimeout(() => {
-      const currentSrc = youtubeIframe.src;
-      if (currentSrc && !currentSrc.includes("autoplay=1")) {
-        const separator = currentSrc.includes("?") ? "&" : "?";
-        youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0&origin=${encodeURIComponent(
-          window.location.origin
-        )}&modestbranding=1&fs=1`;
+      // Check if we're on mobile
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // On mobile, just ensure the iframe has the correct src without extra parameters
+        if (youtubeIframe.src.includes("?")) {
+          // Remove any parameters and use just the base URL
+          youtubeIframe.src = youtubeIframe.src.split("?")[0];
+        }
+      } else {
+        // On desktop, we can use autoplay parameters
+        const currentSrc = youtubeIframe.src;
+        if (currentSrc && !currentSrc.includes("autoplay=1")) {
+          const separator = currentSrc.includes("?") ? "&" : "?";
+          youtubeIframe.src = `${currentSrc}${separator}autoplay=1&rel=0`;
+        }
       }
-    }, 1500); // Wait a bit longer to ensure everything is loaded
+    }, 1000);
   }
 });

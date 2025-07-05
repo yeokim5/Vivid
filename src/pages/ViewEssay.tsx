@@ -267,12 +267,24 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({
             minusSvg.style.display = "none";
           }
           if (youtubeIframe) {
-            const currentSrc = youtubeIframe.src;
-            if (currentSrc && !currentSrc.includes("autoplay=1")) {
-              const separator = currentSrc.includes("?") ? "&" : "?";
-              youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0&mute=0&origin=${encodeURIComponent(
-                window.location.origin
-              )}&modestbranding=1&fs=1`;
+            // Check if we're on mobile
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(
+              navigator.userAgent
+            );
+
+            if (isMobile) {
+              // On mobile, just ensure the iframe has the correct src without extra parameters
+              if (youtubeIframe.src.includes("?")) {
+                // Remove any parameters and use just the base URL
+                youtubeIframe.src = youtubeIframe.src.split("?")[0];
+              }
+            } else {
+              // On desktop, we can use autoplay parameters
+              const currentSrc = youtubeIframe.src;
+              if (currentSrc && !currentSrc.includes("autoplay=1")) {
+                const separator = currentSrc.includes("?") ? "&" : "?";
+                youtubeIframe.src = `${currentSrc}${separator}autoplay=1&rel=0`;
+              }
             }
           }
 
