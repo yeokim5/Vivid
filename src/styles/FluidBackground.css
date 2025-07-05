@@ -1,6 +1,6 @@
 /* Set the link to image you want for the background here */
 :root {
-  --bg-image: url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.vecteezy.com%2Fsystem%2Fresources%2Fpreviews%2F001%2F760%2F936%2Flarge_2x%2Fdark-blue-pattern-with-curves-vector.jpg&f=1&nofb=1&ipt=14661992d1aeed04c295335236443cb829584063f66a097dbd1cdfece651182b&ipo=images');
+  --bg-image: url("https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fstatic.vecteezy.com%2Fsystem%2Fresources%2Fpreviews%2F001%2F760%2F936%2Flarge_2x%2Fdark-blue-pattern-with-curves-vector.jpg&f=1&nofb=1&ipt=14661992d1aeed04c295335236443cb829584063f66a097dbd1cdfece651182b&ipo=images");
 }
 
 .fluid-background {
@@ -36,14 +36,14 @@ canvas {
   height: 100%;
   background: var(--bg-image);
   background-size: cover;
-  filter: url('#swirl');
+  filter: url("#swirl");
   animation: bannermove 120s linear infinite;
   background-repeat: repeat;
 }
 
 /* Mobile optimization class */
 canvas.mobile-optimization {
-  filter: url('#swirl') blur(1px); /* Slightly blur for performance */
+  filter: url("#swirl") blur(1px); /* Slightly blur for performance */
   animation: bannermove 240s linear infinite; /* Slower animation for mobile */
   will-change: transform; /* Hint for browser optimization */
   transform: translateZ(0); /* Force GPU acceleration */
@@ -84,13 +84,13 @@ canvas.mobile-optimization {
 
 @keyframes turbulence {
   0% {
-    baseFrequency: 0.01;
+    basefrequency: 0.01;
   }
   50% {
-    baseFrequency: 0.015;
+    basefrequency: 0.015;
   }
   100% {
-    baseFrequency: 0.01;
+    basefrequency: 0.01;
   }
 }
 
@@ -99,20 +99,20 @@ canvas.mobile-optimization {
   #swirl feTurbulence {
     animation: turbulence-mobile 20s linear infinite; /* Slower animation for mobile */
   }
-  
+
   @keyframes turbulence-mobile {
     0% {
-      baseFrequency: 0.01;
+      basefrequency: 0.01;
     }
     50% {
-      baseFrequency: 0.012; /* Reduced movement on mobile */
+      basefrequency: 0.012; /* Reduced movement on mobile */
     }
     100% {
-      baseFrequency: 0.01;
+      basefrequency: 0.01;
     }
   }
-  
+
   canvas {
     transform: translateZ(0); /* Force GPU acceleration on mobile */
   }
-} 
+}

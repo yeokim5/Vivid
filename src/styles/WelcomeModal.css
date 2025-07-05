@@ -98,11 +98,6 @@
   max-width: 400px;
 }
 
-.credit-icon {
-  font-size: 2.5rem;
-  animation: sparkle 2s ease-in-out infinite;
-}
-
 .credit-info {
   text-align: left;
   flex: 1;

@@ -4,7 +4,7 @@ import axios from "axios";
 import "../styles/Essays.css";
 import Navbar from "../components/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { useInView } from 'react-intersection-observer';
+import { useInView } from "react-intersection-observer";
 import { EditEssayModal } from "../components/EditEssayModal";
 import PurchaseCreditsModal from "../components/PurchaseCreditsModal";
 import ModalPortal from "../components/ModalPortal";
@@ -42,7 +42,7 @@ const UserEssays: React.FC = () => {
   const { user, isAuthenticated, loading: authLoading } = useAuth();
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
   const navigate = useNavigate();
-  
+
   const { ref, inView } = useInView({
     threshold: 0,
   });
@@ -62,23 +62,23 @@ const UserEssays: React.FC = () => {
         },
       });
 
-      console.log('Raw essays data from API:', response.data.essays);
-      
+      // console.log('Raw essays data from API:', response.data.essays);
+
       // Make sure we handle essays with missing data
       const processedEssays = response.data.essays.map((essay: any) => ({
         ...essay,
         subtitle: essay.subtitle || "",
-        tags: (essay.tags || []).filter((tag: string) => tag !== 'html-essay'),
+        tags: (essay.tags || []).filter((tag: string) => tag !== "html-essay"),
         views: essay.views || 0,
-        author: essay.author || { name: user?.name || "Me" }
+        author: essay.author || { name: user?.name || "Me" },
       }));
 
-      console.log('Processed essays data:', processedEssays);
-      
+      // console.log('Processed essays data:', processedEssays);
+
       setEssays(processedEssays);
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching user essays:", err);
+      // console.error("Error fetching user essays:", err);
       setError("Failed to load your essays");
       setLoading(false);
     }
@@ -101,13 +101,16 @@ const UserEssays: React.FC = () => {
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      year: "numeric"
+      year: "numeric",
     });
   };
 
   const filteredEssays = essays.filter((essay) => {
-    return essay.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (essay.subtitle && essay.subtitle.toLowerCase().includes(searchTerm.toLowerCase()));
+    return (
+      essay.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (essay.subtitle &&
+        essay.subtitle.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
   });
 
   const handleEssayClick = (essayId: string) => {
@@ -139,23 +142,26 @@ const UserEssays: React.FC = () => {
   return (
     <div className="essays-container">
       <Navbar />
-      
+
       <div className="essays-hero">
         <h1>My Essays</h1>
         <p className="hero-subtitle">Manage and view all your created essays</p>
-        
+
         <div className="user-credits-container">
           <div className="user-credits">
-            <p>Credits: <span className="credit-count">{user?.credits || 0}</span></p>
+            <p>
+              Credits:{" "}
+              <span className="credit-count">{user?.credits || 0}</span>
+            </p>
           </div>
-          <button 
+          <button
             className="buy-credits-btn"
             onClick={() => setShowPurchaseModal(true)}
           >
             Buy Credits
           </button>
         </div>
-        
+
         <div className="search-bar">
           <input
             type="text"
@@ -164,7 +170,7 @@ const UserEssays: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
+
         <div className="create-essay-container">
           <Link to="/" className="create-essay-btn">
             Create New Essay
@@ -193,15 +199,17 @@ const UserEssays: React.FC = () => {
               </div>
             ) : (
               filteredEssays.map((essay) => (
-                <div 
-                  key={essay._id} 
+                <div
+                  key={essay._id}
                   className="essay-card"
                   onClick={() => handleEssayClick(essay._id)}
                 >
                   {essay.header_background_image && (
-                    <div 
+                    <div
                       className="essay-header-image"
-                      style={{ backgroundImage: `url(${essay.header_background_image})` }}
+                      style={{
+                        backgroundImage: `url(${essay.header_background_image})`,
+                      }}
                     />
                   )}
                   <div className="essay-content">
@@ -213,28 +221,41 @@ const UserEssays: React.FC = () => {
                     {essay.tags && essay.tags.length > 0 && (
                       <div className="essay-tags">
                         {essay.tags
-                          .filter(tag => tag !== 'html-essay')
-                          .map(tag => (
-                            <span key={`${essay._id}-${tag}`} className="essay-tag">{tag}</span>
+                          .filter((tag) => tag !== "html-essay")
+                          .map((tag) => (
+                            <span
+                              key={`${essay._id}-${tag}`}
+                              className="essay-tag"
+                            >
+                              {tag}
+                            </span>
                           ))}
                       </div>
                     )}
                     <h3>
                       {essay.title}
-                      {essay.isPrivate && <span className="title-lock-icon" title="Private essay">🔒</span>}
+                      {essay.isPrivate && (
+                        <span className="title-lock-icon" title="Private essay">
+                          🔒
+                        </span>
+                      )}
                     </h3>
                     {essay.subtitle && (
                       <p className="essay-excerpt">{essay.subtitle}</p>
                     )}
                     <div className="essay-meta">
                       <div className="meta-left">
-                        <span className="essay-author">By {essay.author?.name || 'Me'}</span>
-                        <span className="essay-date">{formatDate(essay.createdAt)}</span>
+                        <span className="essay-author">
+                          By {essay.author?.name || "Me"}
+                        </span>
+                        <span className="essay-date">
+                          {formatDate(essay.createdAt)}
+                        </span>
                       </div>
                       <span className="essay-views">{essay.views} views</span>
                     </div>
                     <div className="essay-actions">
-                      <button 
+                      <button
                         className="edit-essay-btn"
                         onClick={(e) => handleEditClick(e, essay)}
                         title="Edit essay"
@@ -247,7 +268,7 @@ const UserEssays: React.FC = () => {
               ))
             )}
           </div>
-          
+
           {/* Loading indicator and infinite scroll trigger */}
           <div ref={ref} className="h-10 flex items-center justify-center mt-4">
             {loading && <div className="text-gray-500">Loading...</div>}
@@ -262,7 +283,7 @@ const UserEssays: React.FC = () => {
         onClose={() => setIsEditModalOpen(false)}
         onSuccess={handleEditSuccess}
       />
-      
+
       {/* Purchase Credits Modal */}
       {showPurchaseModal && user && (
         <ModalPortal>
@@ -277,4 +298,4 @@ const UserEssays: React.FC = () => {
   );
 };
 
-export default UserEssays; 
+export default UserEssays;

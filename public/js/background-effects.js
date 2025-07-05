@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
     window.essayBackgroundEffect || window.backgroundEffect;
 
   if (backgroundEffect && backgroundEffect !== "none") {
-    console.log("Initializing background effect:", backgroundEffect);
+    // console.log("Initializing background effect:", backgroundEffect);
     initBackgroundEffect(backgroundEffect);
   }
 });

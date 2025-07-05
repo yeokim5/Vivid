@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../styles/VividGenerator.css";
 import ImageSelectionFlow from "./ImageSelectionFlow";
 import SuccessModal from "./SuccessModal";
+import ProcessingModal from "./ProcessingModal";
 import PurchaseCreditsModal from "./PurchaseCreditsModal";
 import ModalPortal from "./ModalPortal";
 import QueueModal from "./QueueModal";
@@ -109,7 +110,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
       return match && match[2].length === 11 ? match[2] : "";
     } catch (error) {
-      console.error("Error extracting YouTube video code:", error);
+      // console.error("Error extracting YouTube video code:", error);
       return "";
     }
   };
@@ -226,7 +227,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
         // Complete processing in queue (only if we have a queue item or were processing)
         if (queueItemId || isLoading) {
-          console.log("[VIVID GENERATOR] Completing queue processing");
+          // console.log("[VIVID GENERATOR] Completing queue processing");
           await fetch(createApiUrl("/queue/complete"), {
             method: "POST",
             headers: authHeaders,
@@ -243,14 +244,14 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
       setError(
         err instanceof Error ? err.message : "An unknown error occurred"
       );
-      console.error("Error in Vivid Generator:", err);
+      // console.error("Error in Vivid Generator:", err);
 
       // Complete processing on error (cleanup) - only if we were actually processing
       if (queueItemId || isLoading) {
         try {
-          console.log(
-            "[VIVID GENERATOR] Cleaning up queue processing after error"
-          );
+          // console.log(
+          //   "[VIVID GENERATOR] Cleaning up queue processing after error"
+          // );
           const cleanupHeaders = getAuthHeaders();
           await fetch(createApiUrl("/queue/complete"), {
             method: "POST",
@@ -261,7 +262,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
           setQueueItemId(null);
           setShowQueueModal(false);
         } catch (cleanupErr) {
-          console.error("Error cleaning up queue:", cleanupErr);
+          // console.error("Error cleaning up queue:", cleanupErr);
         }
       }
     } finally {
@@ -350,7 +351,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         throw new Error("Not authenticated");
       }
 
-      console.log("[VIVID GENERATOR] Attempting to start queue processing...");
+      // console.log("[VIVID GENERATOR] Attempting to start queue processing...");
       const startResponse = await fetch(createApiUrl("/queue/start"), {
         method: "POST",
         headers: authHeaders,
@@ -358,23 +359,23 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
 
       if (!startResponse.ok) {
         const errorData = await startResponse.json().catch(() => null);
-        console.error("[VIVID GENERATOR] Start processing failed:", errorData);
+        // console.error("[VIVID GENERATOR] Start processing failed:", errorData);
 
         if (errorData?.debug) {
-          console.log("[VIVID GENERATOR] Debug info:", errorData.debug);
+          // console.log("[VIVID GENERATOR] Debug info:", errorData.debug);
         }
 
         // Don't retry - just throw the error immediately
         // The queue system should be precise enough now that retries aren't needed
         throw new Error(errorData?.message || "Failed to start processing");
       } else {
-        console.log("[VIVID GENERATOR] Queue processing started successfully");
+        // console.log("[VIVID GENERATOR] Queue processing started successfully");
       }
 
       // Continue with essay generation
       await processEssay();
     } catch (err) {
-      console.error("Error starting queued processing:", err);
+      // console.error("Error starting queued processing:", err);
       setError(
         err instanceof Error ? err.message : "Failed to start processing"
       );
@@ -420,7 +421,7 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
         await processEssay();
       }
     } catch (err) {
-      console.error("Error rejoining queue:", err);
+      // console.error("Error rejoining queue:", err);
       setError(err instanceof Error ? err.message : "Failed to rejoin queue");
     }
   };
@@ -464,6 +465,13 @@ const VividGenerator: React.FC<VividGeneratorProps> = ({
           isOpen={showSuccessModal}
           onClose={handleCloseSuccessModal}
           essayViewUrl={essayViewUrl}
+        />
+      )}
+
+      {isLoading && !showQueueModal && (
+        <ProcessingModal
+          isOpen={isLoading && !showQueueModal}
+          onClose={() => {}} // Don't allow closing during processing
         />
       )}
 

@@ -9,15 +9,36 @@ const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showLogoutMenu, setShowLogoutMenu] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const { user, isAuthenticated, login, logout } = useAuth();
 
+  // Check if the device is mobile
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 960);
+      // If mobile, always show logout menu when authenticated
+      if (window.innerWidth <= 960 && isAuthenticated) {
+        setShowLogoutMenu(true);
+      }
+    };
+
+    // Initial check
+    checkIsMobile();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", checkIsMobile);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, [isAuthenticated]);
+
   // Debug: Log auth state changes
   useEffect(() => {
-    console.log("Navbar - Auth state changed:", {
-      isAuthenticated,
-      user: !!user,
-    });
+    // console.log("Navbar - Auth state changed:", {
+    //   isAuthenticated,
+    //   user: !!user,
+    // });
   }, [isAuthenticated, user]);
 
   // Debounced scroll handler for better performance
@@ -70,8 +91,15 @@ const Navbar: React.FC = () => {
 
   const handleLogout = useCallback(() => {
     logout();
-    setShowLogoutMenu(false);
-  }, [logout]);
+    setShowLogoutMenu(!isMobile); // Keep menu open on mobile after logout
+  }, [logout, isMobile]);
+
+  // Toggle profile menu only on desktop
+  const toggleProfileMenu = useCallback(() => {
+    if (!isMobile) {
+      setShowLogoutMenu(!showLogoutMenu);
+    }
+  }, [showLogoutMenu, isMobile]);
 
   return (
     <>
@@ -101,11 +129,11 @@ const Navbar: React.FC = () => {
                 <div className="profile-container">
                   <button
                     className="nav-link profile-nav-link"
-                    onClick={() => setShowLogoutMenu(!showLogoutMenu)}
+                    onClick={toggleProfileMenu}
                   >
                     Profile
                   </button>
-                  {showLogoutMenu && (
+                  {(showLogoutMenu || isMobile) && (
                     <div className="logout-menu">
                       <div className="profile-menu-item credits-display">
                         Credits: {user?.credits || 0}
@@ -113,7 +141,7 @@ const Navbar: React.FC = () => {
                           className="buy-credits-btn"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setShowLogoutMenu(false);
+                            if (!isMobile) setShowLogoutMenu(false);
                             setShowPurchaseModal(true);
                           }}
                         >
@@ -123,7 +151,9 @@ const Navbar: React.FC = () => {
                       <Link
                         to="/my-essays"
                         className="profile-menu-item"
-                        onClick={() => setShowLogoutMenu(false)}
+                        onClick={() => {
+                          if (!isMobile) setShowLogoutMenu(false);
+                        }}
                       >
                         My Essays
                       </Link>

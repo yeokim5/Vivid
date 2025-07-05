@@ -19,7 +19,7 @@ class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error rendering essay:", error, errorInfo);
+    // console.error("Error rendering essay:", error, errorInfo);
   }
 
   render() {
@@ -233,9 +233,9 @@ const EssayIframe: React.FC<{ html: string; onLoad: () => void }> = ({
 
             // Fallback timeout - show content after 2 seconds regardless
             setTimeout(() => {
-              console.log(
-                `Showing content after timeout. Loaded: ${stylesheetsLoaded}/${stylesheets.length} stylesheets`
-              );
+              // console.log(
+              //   `Showing content after timeout. Loaded: ${stylesheetsLoaded}/${stylesheets.length} stylesheets`
+              // );
               showContent();
             }, 2000);
           }
@@ -333,7 +333,7 @@ const ViewEssay: React.FC = () => {
               );
             }
           } catch (error) {
-            console.error("Failed to increment view count:", error);
+            // console.error("Failed to increment view count:", error);
           }
         }
 
@@ -345,7 +345,7 @@ const ViewEssay: React.FC = () => {
         const htmlContent = await response.text();
         setHtml(htmlContent);
       } catch (error) {
-        console.error("Error:", error);
+        // console.error("Error:", error);
         setError("Failed to load essay");
       } finally {
         setLoading(false);

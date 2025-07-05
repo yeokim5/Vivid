@@ -71,11 +71,11 @@ const QueueModal: React.FC<QueueModalProps> = ({
       );
 
       const data = await response.json();
-      console.log("[QUEUE MODAL] Queue status response:", data);
+      // console.log("[QUEUE MODAL] Queue status response:", data);
 
       if (response.status === 404 || (data.data && !data.data.inQueue)) {
         // Queue item not found - likely processed or removed
-        console.log("[QUEUE MODAL] Queue item not found, rejoining queue");
+        // console.log("[QUEUE MODAL] Queue item not found, rejoining queue");
         setError("Your queue position was lost. Rejoining queue...");
         setTimeout(() => {
           setError("");
@@ -93,10 +93,10 @@ const QueueModal: React.FC<QueueModalProps> = ({
 
         // If user is at position 1 and not currently processing, check if they can start
         if (data.data.position === 1 && !data.data.isProcessing) {
-          console.log(
-            "[QUEUE MODAL] User is first in queue. Estimated wait time:",
-            data.data.estimatedWaitTime
-          );
+          // console.log(
+          //   "[QUEUE MODAL] User is first in queue. Estimated wait time:",
+          //   data.data.estimatedWaitTime
+          // );
 
           // Only proceed if estimated wait time is very low (less than 1 second)
           // This adds extra buffer to prevent rate limit conflicts
@@ -104,25 +104,25 @@ const QueueModal: React.FC<QueueModalProps> = ({
             data.data.estimatedWaitTime < 1000 &&
             !hasTriggeredStartRef.current
           ) {
-            console.log(
-              "[QUEUE MODAL] Ready to start processing - triggering once"
-            );
+            // console.log(
+            //   "[QUEUE MODAL] Ready to start processing - triggering once"
+            // );
             hasTriggeredStartRef.current = true; // Immediate update with ref
             setTimeout(() => onReadyToProcess(), 2000); // Wait 2 extra seconds to be safe
           } else {
-            console.log(
-              "[QUEUE MODAL] Waiting for rate limit:",
-              Math.ceil(data.data.estimatedWaitTime / 1000),
-              "seconds"
-            );
+            // console.log(
+            //   "[QUEUE MODAL] Waiting for rate limit:",
+            //   Math.ceil(data.data.estimatedWaitTime / 1000),
+            //   "seconds"
+            // );
           }
         }
       } else {
-        console.error("[QUEUE MODAL] Invalid queue status response:", data);
+        // console.error("[QUEUE MODAL] Invalid queue status response:", data);
         setError(data.message || "Invalid queue status response");
       }
     } catch (err) {
-      console.error("Error checking queue status:", err);
+      // console.error("Error checking queue status:", err);
       setError("Failed to check queue status. Retrying...");
       // Retry after 5 seconds
       setTimeout(() => {
@@ -158,7 +158,7 @@ const QueueModal: React.FC<QueueModalProps> = ({
         onClose();
       }
     } catch (err) {
-      console.error("Error leaving queue:", err);
+      // console.error("Error leaving queue:", err);
       setError("Failed to leave queue");
     } finally {
       setIsLoading(false);
@@ -182,7 +182,7 @@ const QueueModal: React.FC<QueueModalProps> = ({
       });
 
       const data = await response.json();
-      console.log("[QUEUE MODAL] Join queue response:", data);
+      // console.log("[QUEUE MODAL] Join queue response:", data);
 
       if (data.success && data.data) {
         if (data.data.canProcess) {
@@ -193,11 +193,11 @@ const QueueModal: React.FC<QueueModalProps> = ({
 
         setQueueStatus(data.data);
       } else {
-        console.error("[QUEUE MODAL] Failed to join queue:", data);
+        // console.error("[QUEUE MODAL] Failed to join queue:", data);
         setError(data.message || "Failed to join queue");
       }
     } catch (err) {
-      console.error("Error joining queue:", err);
+      // console.error("Error joining queue:", err);
       setError("Failed to join queue");
     } finally {
       setIsLoading(false);
@@ -254,7 +254,7 @@ const QueueModal: React.FC<QueueModalProps> = ({
   // Debug logging
   useEffect(() => {
     if (queueStatus) {
-      console.log("[QUEUE MODAL] Current status:", queueStatus);
+      // console.log("[QUEUE MODAL] Current status:", queueStatus);
     }
   }, [queueStatus]);
 

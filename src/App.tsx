@@ -10,12 +10,20 @@ import Essays from "./pages/Essays";
 import UserEssays from "./pages/UserEssays";
 import StripeProvider from "./components/StripeProvider";
 import WelcomeModal from "./components/WelcomeModal";
+import AuthNotification from "./components/AuthNotification";
 import ModalPortal from "./components/ModalPortal";
 import "./styles/App.css";
 
 const AppContent: React.FC = () => {
   const location = useLocation();
-  const { user, showWelcomeModal, setShowWelcomeModal } = useAuth();
+  const {
+    user,
+    showWelcomeModal,
+    setShowWelcomeModal,
+    notification,
+    clearNotification,
+    showNotification,
+  } = useAuth();
   const isEssayView =
     location.pathname.startsWith("/essay/") ||
     location.pathname.startsWith("/essays/");
@@ -43,10 +51,30 @@ const AppContent: React.FC = () => {
           <ModalPortal>
             <WelcomeModal
               isOpen={showWelcomeModal}
-              onClose={() => setShowWelcomeModal(false)}
+              onClose={() => {
+                setShowWelcomeModal(false);
+                // Show welcome notification for new users when modal is closed
+                setTimeout(() => {
+                  clearNotification(); // Clear any existing notification first
+                  showNotification(
+                    `Welcome to Vivid, ${user.name || "User"}!`,
+                    "login"
+                  );
+                }, 300); // Small delay to ensure modal close animation completes
+              }}
               userName={user.name}
             />
           </ModalPortal>
+        )}
+
+        {/* Auth Notification */}
+        {notification && (
+          <AuthNotification
+            message={notification.message}
+            type={notification.type}
+            isVisible={notification.isVisible}
+            onClose={clearNotification}
+          />
         )}
       </div>
     </StripeProvider>

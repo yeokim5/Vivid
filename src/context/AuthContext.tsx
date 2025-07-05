@@ -28,6 +28,13 @@ interface AuthContextType {
   syncUserFromToken: (token?: string) => Promise<boolean>;
   showWelcomeModal: boolean;
   setShowWelcomeModal: (show: boolean) => void;
+  notification: {
+    message: string;
+    type: "login" | "logout";
+    isVisible: boolean;
+  } | null;
+  clearNotification: () => void;
+  showNotification: (message: string, type: "login" | "logout") => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,6 +51,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
   const [logoutTimer, setLogoutTimer] = useState<NodeJS.Timeout | null>(null);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "login" | "logout";
+    isVisible: boolean;
+  } | null>(null);
 
   // Function to clear the logout timer
   const clearLogoutTimer = () => {
@@ -100,11 +112,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
           // Set user data from token
           setUser(response.data);
-          console.log("User restored from token:", response.data);
+          // console.log("User restored from token:", response.data);
+
+          // Only show notification if this is the first restoration in this session
+          // (not on every page refresh)
+          const lastNotificationTime = sessionStorage.getItem(
+            "lastLoginNotification"
+          );
+          const currentTime = Date.now();
+          const fiveMinutesAgo = currentTime - 5 * 60 * 1000;
+
+          if (
+            !lastNotificationTime ||
+            parseInt(lastNotificationTime) < fiveMinutesAgo
+          ) {
+            showNotification(
+              `Welcome back, ${response.data.name || "User"}!`,
+              "login"
+            );
+            sessionStorage.setItem(
+              "lastLoginNotification",
+              currentTime.toString()
+            );
+          }
           setupAutoLogout();
           return true;
         } catch (err) {
-          console.error("Error restoring user from token:", err);
+          // console.error("Error restoring user from token:", err);
           // Token is invalid, remove it
           localStorage.removeItem("auth_token");
           localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
@@ -117,13 +151,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Try to restore user from token first
     const initializeAuth = async () => {
-      console.log("Initializing authentication...");
+      // console.log("Initializing authentication...");
       const tokenRestored = await restoreUserFromToken();
-      console.log("Token restored:", tokenRestored);
+      // console.log("Token restored:", tokenRestored);
 
       // Set up Firebase auth state listener
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        console.log("Firebase auth state changed:", !!firebaseUser);
+        // console.log("Firebase auth state changed:", !!firebaseUser);
         if (firebaseUser) {
           // Always check if we need to authenticate with backend
           if (!tokenRestored || !user) {
@@ -148,17 +182,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               // Show welcome modal if this is a new user
               if (response.data.isNewUser) {
                 setShowWelcomeModal(true);
+              } else {
+                // Show login notification for returning users
+                showNotification(
+                  `Welcome back, ${response.data.user.name || "User"}!`,
+                  "login"
+                );
               }
 
               // Set up auto logout timer
               setupAutoLogout();
 
-              console.log(
-                "User authenticated and state updated:",
-                response.data.user
-              );
+              // console.log(
+              //   "User authenticated and state updated:",
+              //   response.data.user
+              // );
             } catch (err) {
-              console.error("Error authenticating with backend:", err);
+              // console.error("Error authenticating with backend:", err);
               setError("Failed to authenticate with server");
             }
           }
@@ -226,9 +266,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (styleElement) document.head.removeChild(styleElement);
 
       // The sign-in was successful
-      console.log(
-        "Google sign-in successful, waiting for auth state update..."
-      );
+      // console.log(
+      //   "Google sign-in successful, waiting for auth state update..."
+      // );
 
       // Don't set loading to false here - let the onAuthStateChanged handler do it
       // This ensures the UI stays in loading state until the user data is fully loaded
@@ -237,7 +277,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const styleElement = document.getElementById("google-popup-style");
       if (styleElement) document.head.removeChild(styleElement);
 
-      console.error("Error during Google sign-in:", err);
+      // console.error("Error during Google sign-in:", err);
       setError("Failed to sign in with Google");
       setLoading(false);
     }
@@ -245,21 +285,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
+      // Get user name before clearing
+      const userName = user?.name || "User";
+
       await signOut(auth);
       localStorage.removeItem("auth_token");
       localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
+      sessionStorage.removeItem("lastLoginNotification"); // Clear notification flag
       setUser(null);
       clearLogoutTimer();
+
+      // Show logout notification
+      showNotification(`Goodbye, ${userName}!`, "logout");
 
       // Also notify backend about logout
       await axios.post(`${API_URL}/auth/logout`);
     } catch (err) {
-      console.error("Error during logout:", err);
+      // console.error("Error during logout:", err);
+      // Get user name before clearing (for error case)
+      const userName = user?.name || "User";
+
       // Still remove token and user data on client side
       localStorage.removeItem("auth_token");
       localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
+      sessionStorage.removeItem("lastLoginNotification"); // Clear notification flag
       setUser(null);
       clearLogoutTimer();
+
+      // Show logout notification even if backend call fails
+      showNotification(`Goodbye, ${userName}!`, "logout");
     }
   };
 
@@ -289,7 +343,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setLoading(false);
         return true;
       } catch (err) {
-        console.error("Error syncing user from token:", err);
+        // console.error("Error syncing user from token:", err);
         localStorage.removeItem("auth_token");
         localStorage.removeItem(LOGIN_TIMESTAMP_KEY);
         setUser(null);
@@ -299,6 +353,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     setLoading(false);
     return false;
+  };
+
+  // Function to clear notification
+  const clearNotification = () => {
+    setNotification(null);
+  };
+
+  // Function to show notification
+  const showNotification = (message: string, type: "login" | "logout") => {
+    setNotification({
+      message,
+      type,
+      isVisible: true,
+    });
   };
 
   const value = {
@@ -312,6 +380,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     syncUserFromToken,
     showWelcomeModal,
     setShowWelcomeModal,
+    notification,
+    clearNotification,
+    showNotification,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

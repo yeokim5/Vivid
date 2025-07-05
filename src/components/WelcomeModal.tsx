@@ -30,7 +30,6 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({
           </p>
 
           <div className="credit-gift">
-            <div className="credit-icon">✨</div>
             <div className="credit-info">
               <h3>You've received 1 free credit!</h3>
               <p>

@@ -30,14 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const element = document.getElementById(id);
       if (element) {
         element.style.backgroundImage = `url('${url}')`;
-        console.log(`Applied background image to ${id}: ${url}`);
+        // console.log(`Applied background image to ${id}: ${url}`);
       } else {
-        console.warn(`Element with id ${id} not found`);
+        // console.warn(`Element with id ${id} not found`);
       }
     } else if (url) {
-      console.warn(`Invalid background image URL for ${id}: ${url}`);
+      // console.warn(`Invalid background image URL for ${id}: ${url}`);
     } else {
-      console.log(`No background image provided for ${id}`);
+      // console.log(`No background image provided for ${id}`);
     }
   });
 
@@ -46,22 +46,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const backgroundEffect =
       window.essayBackgroundEffect || window.backgroundEffect;
     if (backgroundEffect && backgroundEffect !== "none") {
-      console.log(
-        "Essay template initializing background effect:",
-        backgroundEffect
-      );
+      // console.log(
+      //   "Essay template initializing background effect:",
+      //   backgroundEffect
+      // );
 
       // Make sure the background effects script is loaded
       if (typeof window.initBackgroundEffect === "function") {
         window.initBackgroundEffect(backgroundEffect);
       } else {
-        console.warn("Background effects script not loaded yet, retrying...");
+        // console.warn("Background effects script not loaded yet, retrying...");
         // Retry after a short delay
         setTimeout(() => {
           if (typeof window.initBackgroundEffect === "function") {
             window.initBackgroundEffect(backgroundEffect);
           } else {
-            console.error("Background effects script failed to load");
+            // console.error("Background effects script failed to load");
           }
         }, 1000);
       }
@@ -117,13 +117,17 @@ function shareCurrentPage() {
         title: document.title,
         url: window.location.href,
       })
-      .catch((error) => console.log("Error sharing:", error));
+      .catch((error) => {
+        /* console.log("Error sharing:", error) */
+      });
   } else {
     // Fallback for browsers that don't support the Web Share API
     navigator.clipboard
       .writeText(window.location.href)
       .then(() => alert("Link copied to clipboard!"))
-      .catch((err) => console.error("Failed to copy link:", err));
+      .catch((err) => {
+        /* console.error("Failed to copy link:", err) */
+      });
   }
 }
 

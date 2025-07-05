@@ -69,8 +69,12 @@
 }
 
 @keyframes gradientBorder {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
 }
 
 /* Floating shapes removed in favor of fluid background */
@@ -118,7 +122,7 @@
 }
 
 .customize-toggle-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -165,7 +169,13 @@
   font-size: 5.5rem;
   margin-bottom: 20px;
   font-weight: 800;
-  background: linear-gradient(135deg, #fff 20%, #d8deff 40%, #fff 60%, #d8deff 80%);
+  background: linear-gradient(
+    135deg,
+    #fff 20%,
+    #d8deff 40%,
+    #fff 60%,
+    #d8deff 80%
+  );
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -176,7 +186,9 @@
 }
 
 @keyframes shimmer {
-  to { background-position: 200% center; }
+  to {
+    background-position: 200% center;
+  }
 }
 
 /* Enhanced subtitle animation */
@@ -194,7 +206,7 @@
 .rotating-words {
   position: relative;
   display: inline-block;
-  color: #FF3C41;
+  color: #ff3c41;
   height: 1.25em;
   vertical-align: bottom;
   overflow: hidden;
@@ -205,7 +217,7 @@
   display: block;
   animation: animateWords 15s infinite ease;
   font-weight: 700;
-  color: #4A90E2;
+  color: #4a90e2;
   text-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
 }
 
@@ -213,43 +225,43 @@
   0% {
     transform: translateY(0%);
   }
-  
+
   18% {
     transform: translateY(0%);
   }
-  
+
   20% {
     transform: translateY(-100%);
   }
-  
+
   38% {
     transform: translateY(-100%);
   }
-  
+
   40% {
     transform: translateY(-200%);
   }
-  
+
   58% {
     transform: translateY(-200%);
   }
-  
+
   60% {
     transform: translateY(-300%);
   }
-  
+
   78% {
     transform: translateY(-300%);
   }
-  
+
   80% {
     transform: translateY(-400%);
   }
-  
+
   98% {
     transform: translateY(-400%);
   }
-  
+
   100% {
     transform: translateY(0%);
   }
@@ -299,9 +311,7 @@
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 24px;
   padding: 40px;
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.3), 
-    0 0 0 1px rgba(255, 255, 255, 0.1),
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(12px);
   position: relative;
@@ -364,7 +374,8 @@
 
 .essay-title-input:focus {
   outline: none;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(93, 95, 226, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(93, 95, 226, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
 }
@@ -399,7 +410,8 @@
 
 .essay-input:focus {
   outline: none;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(93, 95, 226, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15), 0 0 0 2px rgba(93, 95, 226, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
   background-color: rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
 }
@@ -508,7 +520,11 @@
   margin-bottom: 15px;
   color: var(--dark-gray);
   font-weight: 700;
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--accent-color)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -574,7 +590,11 @@
 .essay-tag {
   display: inline-block;
   padding: 6px 12px;
-  background: linear-gradient(45deg, rgba(93, 95, 226, 0.1), rgba(152, 103, 240, 0.1));
+  background: linear-gradient(
+    45deg,
+    rgba(93, 95, 226, 0.1),
+    rgba(152, 103, 240, 0.1)
+  );
   color: var(--primary-color);
   border-radius: 20px;
   font-size: 0.8rem;
@@ -664,7 +684,7 @@
 }
 
 .explore-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -729,29 +749,29 @@
   .popular-essays-section {
     padding: 60px 20px;
   }
-  
+
   .popular-essays-section h2 {
     font-size: 2.5rem;
   }
-  
+
   .section-subtitle {
     font-size: 1rem;
     margin-bottom: 40px;
   }
-  
+
   .essays-grid {
     grid-template-columns: 1fr;
     max-width: 500px;
   }
-  
+
   .essay-card h3 {
     font-size: 1.3rem;
   }
-  
+
   .explore-more {
     margin-top: 40px;
   }
-  
+
   .explore-btn {
     padding: 14px 28px;
     font-size: 1rem;
@@ -819,7 +839,11 @@
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
   color: white;
   padding: 15px 30px;
   border-radius: 30px;
@@ -836,7 +860,11 @@
 .credits:hover {
   transform: translateX(-50%) translateY(-3px);
   box-shadow: 0 12px 30px rgba(93, 95, 226, 0.6);
-  background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+  background: linear-gradient(
+    135deg,
+    var(--secondary-color),
+    var(--primary-color)
+  );
 }
 
 @media (max-width: 768px) {
@@ -998,11 +1026,11 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .color-input-container {
     flex-wrap: wrap;
   }
-  
+
   .styling-options {
     padding: 1rem;
   }
@@ -1102,7 +1130,7 @@
 
 .preview-container .firefly::before,
 .preview-container .firefly::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 100%;
   height: 100%;
@@ -1133,7 +1161,9 @@
 }
 
 @keyframes flash {
-  0%, 30%, 100% {
+  0%,
+  30%,
+  100% {
     opacity: 0;
     box-shadow: 0 0 0vw 0vw yellow;
   }
@@ -1275,7 +1305,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.1);
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -1288,13 +1318,17 @@
   left: 2px;
   bottom: 2px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 input:checked + .toggle-slider {
-  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--secondary-color)
+  );
   border-color: rgba(255, 255, 255, 0.3);
 }
 
