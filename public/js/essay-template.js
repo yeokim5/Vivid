@@ -158,7 +158,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const currentSrc = youtubeIframe.src;
       if (currentSrc && !currentSrc.includes("autoplay=1")) {
         const separator = currentSrc.includes("?") ? "&" : "?";
-        youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0`;
+        youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0&origin=${encodeURIComponent(
+          window.location.origin
+        )}&modestbranding=1&fs=1`;
       }
     }, 1500); // Wait a bit longer to ensure everything is loaded
   }
