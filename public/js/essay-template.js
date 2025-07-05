@@ -154,6 +154,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Ensure autoplay works - try to play the video after a short delay
   if (youtubeIframe) {
+    // First, try to force load the iframe
+    youtubeIframe.addEventListener("load", function () {
+      // After iframe loads, try to ensure playback works
+      if (youtubeIframe.src.indexOf("autoplay=1") === -1) {
+        const currentSrc = youtubeIframe.src;
+        const separator = currentSrc.includes("?") ? "&" : "?";
+        youtubeIframe.src = `${currentSrc}${separator}autoplay=1&enablejsapi=1&playsinline=1&controls=1&rel=0&origin=${encodeURIComponent(
+          window.location.origin
+        )}&modestbranding=1&fs=1`;
+      }
+    });
+
+    // Also try the delayed approach as backup
     setTimeout(() => {
       const currentSrc = youtubeIframe.src;
       if (currentSrc && !currentSrc.includes("autoplay=1")) {
