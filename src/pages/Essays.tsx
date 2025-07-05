@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useInView } from 'react-intersection-observer';
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useInView } from "react-intersection-observer";
 import Navbar from "../components/Navbar";
 import "../styles/Essays.css";
 
@@ -11,7 +11,7 @@ interface Essay {
   header_background_image?: string;
   author: {
     name: string;
-  };
+  } | null;
   views: number;
   createdAt: string;
   tags?: string[];
@@ -33,29 +33,34 @@ const Essays: React.FC = () => {
     threshold: 0,
   });
 
-  const fetchEssays = useCallback(async (page: number) => {
-    try {
-      const response = await fetch(`${API_URL}/essays?page=${page}&limit=10&sortBy=${sortBy}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch essays");
+  const fetchEssays = useCallback(
+    async (page: number) => {
+      try {
+        const response = await fetch(
+          `${API_URL}/essays?page=${page}&limit=10&sortBy=${sortBy}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch essays");
+        }
+        const data = await response.json();
+
+        if (page === 1) {
+          setEssays(data.essays);
+        } else {
+          setEssays((prev) => [...prev, ...data.essays]);
+        }
+
+        setTotalPages(data.totalPages);
+        setHasMore(page < data.totalPages);
+        setCurrentPage(page);
+      } catch (error) {
+        console.error("Error fetching essays:", error);
+      } finally {
+        setLoading(false);
       }
-      const data = await response.json();
-      
-      if (page === 1) {
-        setEssays(data.essays);
-      } else {
-        setEssays(prev => [...prev, ...data.essays]);
-      }
-      
-      setTotalPages(data.totalPages);
-      setHasMore(page < data.totalPages);
-      setCurrentPage(page);
-    } catch (error) {
-      console.error("Error fetching essays:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [sortBy, API_URL]);
+    },
+    [sortBy, API_URL]
+  );
 
   useEffect(() => {
     setEssays([]);
@@ -76,24 +81,29 @@ const Essays: React.FC = () => {
 
   const filteredEssays = essays
     .filter((essay) => {
-      const matchesSearch = essay.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (essay.subtitle && essay.subtitle.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesTag = !selectedTag || (essay.tags && essay.tags.includes(selectedTag));
+      const matchesSearch =
+        essay.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (essay.subtitle &&
+          essay.subtitle.toLowerCase().includes(searchTerm.toLowerCase()));
+      const matchesTag =
+        !selectedTag || (essay.tags && essay.tags.includes(selectedTag));
       return matchesSearch && matchesTag;
     })
-    .map(essay => ({
+    .map((essay) => ({
       ...essay,
-      tags: essay.tags?.filter(tag => tag !== 'html-essay') || []
+      tags: essay.tags?.filter((tag) => tag !== "html-essay") || [],
     }));
 
-  const allTags = Array.from(new Set(essays.flatMap(essay => essay.tags || []))).filter(tag => tag !== 'html-essay');
+  const allTags = Array.from(
+    new Set(essays.flatMap((essay) => essay.tags || []))
+  ).filter((tag) => tag !== "html-essay");
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      year: "numeric"
+      year: "numeric",
     });
   };
 
@@ -112,11 +122,13 @@ const Essays: React.FC = () => {
   return (
     <div className="essays-container">
       <Navbar />
-      
+
       <div className="essays-hero">
         <h1>Explore</h1>
-        <p className="hero-subtitle">Discover thought-provoking essays from creative minds</p>
-        
+        <p className="hero-subtitle">
+          Discover thought-provoking essays from creative minds
+        </p>
+
         <div className="search-bar">
           <input
             type="text"
@@ -129,16 +141,16 @@ const Essays: React.FC = () => {
 
       <div className="essays-controls">
         <div className="tags-filter">
-          <button 
-            className={`tag-btn ${!selectedTag ? 'active' : ''}`}
+          <button
+            className={`tag-btn ${!selectedTag ? "active" : ""}`}
             onClick={() => setSelectedTag(null)}
           >
             All
           </button>
-          {allTags.map(tag => (
+          {allTags.map((tag) => (
             <button
               key={tag}
-              className={`tag-btn ${selectedTag === tag ? 'active' : ''}`}
+              className={`tag-btn ${selectedTag === tag ? "active" : ""}`}
               onClick={() => setSelectedTag(tag)}
             >
               {tag}
@@ -148,14 +160,14 @@ const Essays: React.FC = () => {
 
         <div className="sort-controls">
           <button
-            className={`sort-btn ${sortBy === 'latest' ? 'active' : ''}`}
-            onClick={() => setSortBy('latest')}
+            className={`sort-btn ${sortBy === "latest" ? "active" : ""}`}
+            onClick={() => setSortBy("latest")}
           >
             Latest
           </button>
           <button
-            className={`sort-btn ${sortBy === 'popular' ? 'active' : ''}`}
-            onClick={() => setSortBy('popular')}
+            className={`sort-btn ${sortBy === "popular" ? "active" : ""}`}
+            onClick={() => setSortBy("popular")}
           >
             Most Popular
           </button>
@@ -170,22 +182,26 @@ const Essays: React.FC = () => {
           </div>
         ) : (
           filteredEssays.map((essay) => (
-            <div 
-              key={essay._id} 
+            <div
+              key={essay._id}
               className="essay-card"
               onClick={() => handleEssayClick(essay._id)}
             >
               {essay.header_background_image && (
-                <div 
+                <div
                   className="essay-header-image"
-                  style={{ backgroundImage: `url(${essay.header_background_image})` }}
+                  style={{
+                    backgroundImage: `url(${essay.header_background_image})`,
+                  }}
                 />
               )}
               <div className="essay-content">
                 {essay.tags && essay.tags.length > 0 && (
                   <div className="essay-tags">
-                    {essay.tags.map(tag => (
-                      <span key={`${essay._id}-${tag}`} className="essay-tag">{tag}</span>
+                    {essay.tags.map((tag) => (
+                      <span key={`${essay._id}-${tag}`} className="essay-tag">
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 )}
@@ -193,8 +209,12 @@ const Essays: React.FC = () => {
                 <p className="essay-excerpt">{essay.subtitle}</p>
                 <div className="essay-meta">
                   <div className="meta-left">
-                    <span className="essay-author">By {essay.author.name}</span>
-                    <span className="essay-date">{formatDate(essay.createdAt)}</span>
+                    <span className="essay-author">
+                      By {essay.author ? essay.author.name : "Anonymous"}
+                    </span>
+                    <span className="essay-date">
+                      {formatDate(essay.createdAt)}
+                    </span>
                   </div>
                   <span className="essay-views">{essay.views} views</span>
                 </div>
@@ -207,12 +227,10 @@ const Essays: React.FC = () => {
       {/* Loading indicator and infinite scroll trigger */}
       <div ref={ref} className="h-10 flex items-center justify-center mt-4">
         {loading && <div className="text-gray-500">Loading...</div>}
-        {!hasMore && essays.length > 0 && (
-          <div className="text-gray-500"></div>
-        )}
+        {!hasMore && essays.length > 0 && <div className="text-gray-500"></div>}
       </div>
     </div>
   );
 };
 
-export default Essays; 
+export default Essays;
