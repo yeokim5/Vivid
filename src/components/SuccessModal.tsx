@@ -14,8 +14,8 @@ const SuccessModal: React.FC<SuccessModalProps> = ({
   essayViewUrl,
 }) => {
   const handleViewEssay = () => {
-    // Open in the same tab to ensure autoplay works
-    window.location.href = essayViewUrl;
+    // Open in a new tab
+    window.open(essayViewUrl, "_blank");
   };
 
   return (

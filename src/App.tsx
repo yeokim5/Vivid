@@ -53,14 +53,7 @@ const AppContent: React.FC = () => {
               isOpen={showWelcomeModal}
               onClose={() => {
                 setShowWelcomeModal(false);
-                // Show welcome notification for new users when modal is closed
-                setTimeout(() => {
-                  clearNotification(); // Clear any existing notification first
-                  showNotification(
-                    `Welcome to Vivid, ${user.name || "User"}!`,
-                    "login"
-                  );
-                }, 300); // Small delay to ensure modal close animation completes
+                // No longer show notification when closing the welcome modal
               }}
               userName={user.name}
             />

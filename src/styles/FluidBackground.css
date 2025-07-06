@@ -39,15 +39,14 @@ canvas {
   filter: url("#swirl");
   animation: bannermove 120s linear infinite;
   background-repeat: repeat;
-}
-
-/* Mobile optimization class */
-canvas.mobile-optimization {
-  filter: url("#swirl") blur(1px); /* Slightly blur for performance */
-  animation: bannermove 240s linear infinite; /* Slower animation for mobile */
   will-change: transform; /* Hint for browser optimization */
   transform: translateZ(0); /* Force GPU acceleration */
-  background-size: 200% 200%; /* Larger background size for smoother scaling */
+}
+
+/* Consistent rendering class for all devices */
+canvas.consistent-rendering {
+  background-size: cover;
+  animation: bannermove 120s linear infinite;
 }
 
 /* Animation for the background image movement */
@@ -91,28 +90,5 @@ canvas.mobile-optimization {
   }
   100% {
     basefrequency: 0.01;
-  }
-}
-
-/* Mobile specific optimizations */
-@media (max-width: 768px) {
-  #swirl feTurbulence {
-    animation: turbulence-mobile 20s linear infinite; /* Slower animation for mobile */
-  }
-
-  @keyframes turbulence-mobile {
-    0% {
-      basefrequency: 0.01;
-    }
-    50% {
-      basefrequency: 0.012; /* Reduced movement on mobile */
-    }
-    100% {
-      basefrequency: 0.01;
-    }
-  }
-
-  canvas {
-    transform: translateZ(0); /* Force GPU acceleration on mobile */
   }
 }

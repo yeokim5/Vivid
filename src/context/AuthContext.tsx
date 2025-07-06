@@ -114,27 +114,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           setUser(response.data);
           // console.log("User restored from token:", response.data);
 
-          // Only show notification if this is the first restoration in this session
-          // (not on every page refresh)
-          const lastNotificationTime = sessionStorage.getItem(
-            "lastLoginNotification"
-          );
-          const currentTime = Date.now();
-          const fiveMinutesAgo = currentTime - 5 * 60 * 1000;
+          // We no longer show notification on token restoration
+          // This ensures the welcome message only appears on explicit login
 
-          if (
-            !lastNotificationTime ||
-            parseInt(lastNotificationTime) < fiveMinutesAgo
-          ) {
-            showNotification(
-              `Welcome back, ${response.data.name || "User"}!`,
-              "login"
-            );
-            sessionStorage.setItem(
-              "lastLoginNotification",
-              currentTime.toString()
-            );
-          }
           setupAutoLogout();
           return true;
         } catch (err) {
@@ -183,11 +165,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               if (response.data.isNewUser) {
                 setShowWelcomeModal(true);
               } else {
-                // Show login notification for returning users
-                showNotification(
-                  `Welcome back, ${response.data.user.name || "User"}!`,
-                  "login"
-                );
+                // Only show login notification for explicit login actions (not token restoration)
+                // We only want to show this when the user actually clicks the login button
+                // not when their token is automatically restored
+                const isExplicitLogin =
+                  sessionStorage.getItem("explicit_login_in_progress") ===
+                  "true";
+                if (isExplicitLogin) {
+                  showNotification(
+                    `Welcome back, ${response.data.user.name || "User"}!`,
+                    "login"
+                  );
+                  // Clear the flag
+                  sessionStorage.removeItem("explicit_login_in_progress");
+                }
               }
 
               // Set up auto logout timer
@@ -237,6 +228,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setLoading(true);
       setError(null); // Clear any previous errors
+
+      // Set a flag to indicate this is an explicit login action
+      sessionStorage.setItem("explicit_login_in_progress", "true");
+
       const provider = new GoogleAuthProvider();
 
       // Set custom parameters for the Google provider

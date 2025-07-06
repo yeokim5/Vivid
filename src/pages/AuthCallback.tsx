@@ -5,7 +5,8 @@ import { useAuth } from "../context/AuthContext";
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { syncUserFromToken, setShowWelcomeModal } = useAuth();
+  const { syncUserFromToken, setShowWelcomeModal, showNotification } =
+    useAuth();
 
   useEffect(() => {
     // Get token from URL query parameters
@@ -30,6 +31,8 @@ const AuthCallback: React.FC = () => {
           // Show welcome modal if this is a new user
           if (isNewUser) {
             setShowWelcomeModal(true);
+            // Set flag for explicit login to show welcome notification
+            sessionStorage.setItem("explicit_login_in_progress", "true");
           }
           // Redirect to home page after successful sync
           navigate("/");
@@ -42,7 +45,13 @@ const AuthCallback: React.FC = () => {
       // No token found, redirect to login
       navigate("/login?error=no_token");
     }
-  }, [location, navigate, syncUserFromToken]);
+  }, [
+    location,
+    navigate,
+    syncUserFromToken,
+    setShowWelcomeModal,
+    showNotification,
+  ]);
 
   return (
     <div className="auth-callback">

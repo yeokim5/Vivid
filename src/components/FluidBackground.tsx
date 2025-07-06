@@ -16,22 +16,8 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [baseFrequency, setBaseFrequency] = useState(0.01);
   const [scale, setScale] = useState(300);
-  const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile device
-  useEffect(() => {
-    const checkMobile = () => {
-      const width = window.innerWidth;
-      const isMobileDevice = width <= 768;
-      setIsMobile(isMobileDevice);
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  // Animate the SVG filter properties with performance optimization for mobile
+  // Animate the SVG filter properties consistently across devices
   useEffect(() => {
     let animationFrameId: number;
     let startTime = Date.now();
@@ -40,23 +26,15 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({
       const currentTime = Date.now();
       const elapsed = (currentTime - startTime) / 1000; // time in seconds
 
-      // Less frequent updates for mobile devices
-      const updateFrequency = isMobile ? 100 : 1; // Only update every 100ms on mobile
+      // Consistent animation intensity for all devices
+      const intensityFactor = 1.0;
 
-      if (isMobile && currentTime % updateFrequency !== 0) {
-        animationFrameId = requestAnimationFrame(animate);
-        return;
-      }
-
-      // Reduced animation intensity for mobile
-      const intensityFactor = isMobile ? 0.3 : 1;
-
-      // Animate baseFrequency with a subtle sine wave - reduced for mobile
+      // Animate baseFrequency with a subtle sine wave
       const newBaseFrequency =
         0.01 + Math.sin(elapsed * 0.2) * 0.005 * intensityFactor;
       setBaseFrequency(newBaseFrequency);
 
-      // Animate scale with a different frequency - reduced for mobile
+      // Animate scale with a different frequency
       const newScale = 300 + Math.sin(elapsed * 0.1) * 20 * intensityFactor;
       setScale(newScale);
 
@@ -68,18 +46,14 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [isMobile]);
+  }, []);
 
   // Set up canvas and resize observer
   useEffect(() => {
     if (sliderRef.current && turbulenceRef.current) {
-      // Reduce complexity on mobile devices
-      const actualComplexity = isMobile ? Math.min(complexity, 2) : complexity;
-      sliderRef.current.value = actualComplexity.toString();
-      turbulenceRef.current.setAttribute(
-        "numOctaves",
-        actualComplexity.toString()
-      );
+      // Use consistent complexity across all devices
+      sliderRef.current.value = complexity.toString();
+      turbulenceRef.current.setAttribute("numOctaves", complexity.toString());
     }
 
     // Initialize canvas and create fluid background effect
@@ -136,7 +110,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({
         resizeObserverRef.current = null;
       }
     };
-  }, [complexity, isMobile]);
+  }, [complexity]);
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -163,10 +137,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({
 
       {/* The background itself */}
       <div id="container" ref={containerRef}>
-        <canvas
-          ref={canvasRef}
-          className={isMobile ? "mobile-optimization" : ""}
-        ></canvas>
+        <canvas ref={canvasRef} className="consistent-rendering"></canvas>
       </div>
 
       {/* svg magic that makes this happen */}
@@ -175,7 +146,7 @@ const FluidBackground: React.FC<FluidBackgroundProps> = ({
           <feTurbulence
             ref={turbulenceRef}
             baseFrequency={baseFrequency}
-            numOctaves={isMobile ? Math.min(complexity, 2) : complexity}
+            numOctaves={complexity}
             result="wrap"
             type="fractalNoise"
           ></feTurbulence>

@@ -76,7 +76,7 @@ const Essays: React.FC = () => {
   }, [inView, hasMore, loading, currentPage, fetchEssays]);
 
   const handleEssayClick = (essayId: string) => {
-    navigate(`/essay/${essayId}`);
+    window.open(`/essay/${essayId}`, "_blank");
   };
 
   const filteredEssays = essays

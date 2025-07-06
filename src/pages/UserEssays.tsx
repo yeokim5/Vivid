@@ -114,7 +114,7 @@ const UserEssays: React.FC = () => {
   });
 
   const handleEssayClick = (essayId: string) => {
-    navigate(`/essay/${essayId}`);
+    window.open(`/essay/${essayId}`, "_blank");
   };
 
   const handleEditClick = (event: React.MouseEvent, essay: Essay) => {

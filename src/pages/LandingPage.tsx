@@ -343,7 +343,7 @@ const LandingPage: React.FC = () => {
             <div
               key={essay._id}
               className="essay-card"
-              onClick={() => navigate(`/essay/${essay._id}`)}
+              onClick={() => window.open(`/essay/${essay._id}`, "_blank")}
             >
               {essay.header_background_image && (
                 <div
