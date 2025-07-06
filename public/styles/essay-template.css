@@ -457,7 +457,7 @@ section {
   border-radius: 8px;
 }
 
-/* Share and Make Your Own buttons - only show on last section */
+/* Share and Make Your Own buttons - always visible */
 .credits {
   position: fixed;
   color: rgba(255, 255, 255, 1);
@@ -478,8 +478,8 @@ section {
   justify-content: center;
   height: 2.5rem;
   line-height: 1;
-  opacity: 0;
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
 }
 
 .credits:hover {
@@ -509,8 +509,8 @@ section {
   width: 2.5rem;
   height: 2.5rem;
   transform: translateY(0);
-  opacity: 0;
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
 }
 
 .share-icon {
@@ -523,19 +523,7 @@ section {
   opacity: 0.8;
 }
 
-/* Show buttons only on the last section */
-.section-9 .credits,
-.section-9 .share-button {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Show buttons when scrolled to bottom */
-body.last-section .credits,
-body.last-section .share-button {
-  opacity: 1;
-  visibility: visible;
-}
+/* Buttons are always visible - no conditional rules needed */
 
 /* Loading state */
 .loading {
@@ -605,8 +593,8 @@ body.last-section .share-button {
 /* Tablet and mobile button positioning */
 @media (max-width: 768px) {
   .credits {
-    right: 1rem;
-    bottom: 4rem;
+    right: 4rem;
+    bottom: 3rem;
     font-size: 0.9rem;
     padding: 0.6rem 0.8rem;
     height: 2.35rem;
@@ -618,7 +606,7 @@ body.last-section .share-button {
 
   .share-button {
     right: 1rem;
-    bottom: 1rem;
+    bottom: 3rem;
     width: 2.35rem;
     height: 2.35rem;
     padding: 0.6rem;

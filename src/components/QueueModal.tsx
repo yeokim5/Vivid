@@ -319,11 +319,14 @@ const QueueModal: React.FC<QueueModalProps> = ({
 
               <div className="queue-explanation">
                 <p>
-                  <strong>Why the wait?</strong> Our image generation API allows
-                  only one essay every 68 seconds to ensure the best quality
-                  images and smooth processing for your essay.
+                  <strong>Why the wait?</strong> Our servers are currently
+                  experiencing high traffic, so we’re limiting the number of
+                  essays being processed at the same time.
                 </p>
-                <p>You'll be automatically notified when it's your turn!</p>
+                <p>
+                  You can switch to another tab, but please don’t close this one
+                  if you want to keep your place in the queue.
+                </p>
               </div>
 
               {queueStatus.position === 1 &&
