@@ -41,7 +41,7 @@ body {
 }
 
 header {
-  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -103,10 +103,10 @@ h2 {
 /* New Scroll Indicator Styles */
 .scroll-indicator {
   font-size: 2rem;
-  bottom: -20%;
-  left: 0;
-  right: 0;
-  margin: 0 auto;
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -167,7 +167,7 @@ h2 {
 }
 
 section {
-  min-height: 100vh;
+  min-height: calc(var(--vh, 1vh) * 100);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -632,12 +632,34 @@ body.last-section .share-button {
     width: 1.1rem;
     height: 1.1rem;
   }
+
+  /* Tablet scroll indicator positioning */
+  .scroll-indicator {
+    bottom: 18%;
+    font-size: 1.8rem;
+  }
+
+  .scroll-text {
+    font-size: 0.72rem;
+  }
+
+  .scroll-arrow {
+    width: 19px;
+    height: 19px;
+  }
 }
 
 /* Enhanced mobile experience */
 @media (max-width: 480px) {
   section {
     padding: 1.5rem 1rem;
+    /* Ensure proper mobile viewport height */
+    min-height: calc(var(--vh, 1vh) * 100);
+  }
+
+  header {
+    /* Ensure proper mobile viewport height */
+    height: calc(var(--vh, 1vh) * 100);
   }
 
   .quote {
@@ -677,6 +699,21 @@ body.last-section .share-button {
   .share-icon {
     width: 1rem;
     height: 1rem;
+  }
+
+  /* Mobile scroll indicator positioning */
+  .scroll-indicator {
+    bottom: 20%;
+    font-size: 1.5rem;
+  }
+
+  .scroll-text {
+    font-size: 0.7rem;
+  }
+
+  .scroll-arrow {
+    width: 18px;
+    height: 18px;
   }
 
   /* Handle very narrow screens */
