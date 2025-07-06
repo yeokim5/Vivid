@@ -49,6 +49,184 @@ canvas.consistent-rendering {
   animation: bannermove 120s linear infinite;
 }
 
+/* Low-performance device optimizations */
+.fluid-background.low-performance {
+  /* Ultra-aggressive optimizations for low-performance devices */
+  opacity: 0.8; /* Reduce opacity to lower GPU load */
+  transform: translate3d(0, 0, 0); /* Force GPU layer */
+  backface-visibility: hidden; /* Reduce repaints */
+  pointer-events: none; /* Prevent any interaction overhead */
+}
+
+.low-performance-canvas {
+  /* Minimal animation for low-performance devices */
+  animation: bannermove-low-perf 300s linear infinite; /* Very slow animation */
+  filter: url("#swirl") brightness(1.3) contrast(1.1); /* Brighter to compensate for reduced effects */
+  image-rendering: optimizeSpeed; /* Prioritize speed over quality */
+  image-rendering: -webkit-optimize-contrast; /* WebKit specific */
+  image-rendering: optimize-contrast; /* Standard */
+  opacity: 0.9; /* Slightly transparent to reduce GPU load */
+}
+
+/* Ultra-simplified animation for low-performance devices */
+@keyframes bannermove-low-perf {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+/* Low-performance SVG filter overrides */
+.fluid-background.low-performance #swirl feTurbulence {
+  animation: none; /* Disable turbulence animation */
+  basefrequency: 0.005; /* Very low static value */
+}
+
+.fluid-background.low-performance svg {
+  filter: brightness(1.3); /* Compensate for reduced effects */
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .fluid-background.mobile-optimized {
+    /* Reduce rendering complexity on mobile */
+    transform: translate3d(0, 0, 0); /* Force GPU layer */
+    backface-visibility: hidden; /* Reduce repaints */
+  }
+
+  .mobile-canvas {
+    /* Simplified animation for mobile */
+    animation: bannermove-mobile 180s linear infinite; /* Slower animation */
+    filter: url("#swirl") brightness(1.1); /* Slightly brighter to compensate for reduced complexity */
+    image-rendering: optimizeSpeed; /* Prioritize speed over quality */
+    image-rendering: -webkit-optimize-contrast; /* WebKit specific */
+    image-rendering: optimize-contrast; /* Standard */
+  }
+
+  /* Simplified mobile animation */
+  @keyframes bannermove-mobile {
+    0% {
+      background-position: 0% 0%;
+    }
+    50% {
+      background-position: 50% 50%;
+    }
+    100% {
+      background-position: 100% 100%;
+    }
+  }
+
+  /* Reduce SVG filter complexity on mobile */
+  .fluid-background.mobile-optimized svg {
+    filter: brightness(1.1); /* Slight compensation */
+  }
+
+  /* Reduce animation frequency for mobile turbulence */
+  .fluid-background.mobile-optimized #swirl feTurbulence {
+    animation: turbulence-mobile 15s linear infinite; /* Slower turbulence */
+  }
+
+  @keyframes turbulence-mobile {
+    0% {
+      basefrequency: 0.008;
+    }
+    50% {
+      basefrequency: 0.01;
+    }
+    100% {
+      basefrequency: 0.008;
+    }
+  }
+
+  /* Extra optimizations for mobile low-performance */
+  .fluid-background.mobile-optimized.low-performance {
+    opacity: 0.7; /* More transparent on mobile low-performance */
+  }
+
+  .mobile-canvas.low-performance-canvas {
+    animation: none; /* Disable all animations on mobile low-performance */
+    background-position: center; /* Static background */
+    filter: url("#swirl") brightness(1.4) contrast(1.2); /* High brightness to compensate */
+  }
+}
+
+/* High-performance mode for very low-end devices */
+@media (max-width: 480px) {
+  .fluid-background.mobile-optimized {
+    /* Even more aggressive optimizations for small screens */
+    pointer-events: none; /* Prevent unnecessary event handling */
+  }
+
+  .mobile-canvas {
+    /* Static background for very small screens to prevent lag */
+    animation: none;
+    background-position: center;
+    filter: url("#swirl") brightness(1.2);
+  }
+
+  /* Disable complex filters on very small screens */
+  .fluid-background.mobile-optimized #swirl feTurbulence {
+    animation: none;
+    basefrequency: 0.008; /* Static value */
+  }
+
+  /* For very small screens with low performance, use static background */
+  .fluid-background.mobile-optimized.low-performance {
+    opacity: 0.6; /* Very transparent */
+  }
+
+  .mobile-canvas.low-performance-canvas {
+    filter: none; /* Remove all filters for maximum performance */
+    opacity: 0.5; /* Very light background */
+  }
+}
+
+/* Reduce motion for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  canvas {
+    animation: none;
+  }
+
+  #swirl feTurbulence {
+    animation: none;
+    basefrequency: 0.01;
+  }
+
+  /* Override low-performance settings if user prefers reduced motion */
+  .low-performance-canvas {
+    animation: none;
+  }
+
+  .fluid-background.low-performance #swirl feTurbulence {
+    animation: none;
+  }
+}
+
+/* Desktop optimizations - keep full animations */
+@media (min-width: 769px) {
+  .fluid-background {
+    /* Full desktop experience */
+    transform: none; /* Allow normal transforms */
+  }
+
+  canvas {
+    /* Full desktop animation */
+    animation: bannermove 120s linear infinite;
+    image-rendering: auto; /* Better quality on desktop */
+  }
+
+  /* Even on desktop, respect low-performance mode */
+  .fluid-background.low-performance {
+    opacity: 0.85; /* Slightly more visible on desktop */
+  }
+
+  .low-performance-canvas {
+    animation: bannermove-low-perf 240s linear infinite; /* Slower but not as extreme as mobile */
+  }
+}
+
 /* Animation for the background image movement */
 @keyframes bannermove {
   0% {

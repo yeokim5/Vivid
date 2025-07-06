@@ -649,29 +649,17 @@ body.last-section .share-button {
     font-size: clamp(2rem, 10vw, 4rem);
   }
 
-  /* Mobile-specific button positioning */
+  /* Mobile-specific button adjustments - only size changes */
   .credits {
-    right: 1rem;
-    bottom: 4rem;
     font-size: 0.9rem;
     padding: 0.5rem 0.75rem;
     height: 2.25rem;
-    z-index: 15;
-    /* Ensure buttons are touchable on mobile */
-    min-width: 44px;
-    min-height: 44px;
   }
 
   .share-button {
-    right: 1rem;
-    bottom: 1rem;
     width: 2.25rem;
     height: 2.25rem;
     padding: 0.5rem;
-    z-index: 15;
-    /* Ensure buttons are touchable on mobile */
-    min-width: 44px;
-    min-height: 44px;
   }
 
   .share-icon {
