@@ -73,6 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const shareButton = document.querySelector(".share-button");
   const creditsButton = document.querySelector(".credits");
 
+  // Use different thresholds for mobile vs desktop
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  const observerThreshold = isMobile ? 0.2 : 0.5;
+
   const sectionObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -101,12 +105,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     },
-    { threshold: 0.5 }
+    { threshold: observerThreshold }
   );
 
   sections.forEach((section) => {
     sectionObserver.observe(section);
   });
+
+  // Additional mobile-friendly fallback - show buttons when near bottom of page
+  if (isMobile) {
+    const showButtonsOnScroll = () => {
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Show buttons when user is within 90% of the page bottom
+      if (scrollTop + windowHeight >= documentHeight * 0.9) {
+        if (shareButton) {
+          shareButton.style.opacity = "1";
+          shareButton.style.visibility = "visible";
+        }
+        if (creditsButton) {
+          creditsButton.style.opacity = "1";
+          creditsButton.style.visibility = "visible";
+        }
+      }
+    };
+
+    // Throttle scroll events for performance
+    let scrollTimeout;
+    window.addEventListener("scroll", () => {
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = setTimeout(showButtonsOnScroll, 100);
+    });
+  }
 });
 
 // Sharing functionality
