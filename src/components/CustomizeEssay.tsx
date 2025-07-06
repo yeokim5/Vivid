@@ -319,7 +319,12 @@ const CustomizeEssay: React.FC<CustomizeEssayProps> = ({
         </div>
 
         <div className="styling-item">
-          <label>Background Music</label>
+          <label>
+            Background Music
+            <br />
+            <small>(Works on desktop; may not play on mobile devices)</small>
+          </label>
+
           <input
             type="text"
             value={youtubeUrl}
