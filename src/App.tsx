@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LandingPage from "./pages/LandingPage";
@@ -27,6 +27,11 @@ const AppContent: React.FC = () => {
   const isEssayView =
     location.pathname.startsWith("/essay/") ||
     location.pathname.startsWith("/essays/");
+
+  // Reset body overflow on route changes to prevent scroll lock issues
+  useEffect(() => {
+    document.body.style.overflow = "";
+  }, [location.pathname]);
 
   return (
     <StripeProvider>

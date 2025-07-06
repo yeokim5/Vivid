@@ -17,14 +17,23 @@ const FullScreenModal: React.FC<FullScreenModalProps> = ({
 }) => {
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "";
     }
+
+    // Cleanup function to always reset overflow when component unmounts
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  // Additional cleanup on unmount to ensure scroll is never locked
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
 
   if (!isOpen) return null;
 

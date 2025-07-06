@@ -66,18 +66,36 @@ const Navbar: React.FC = () => {
 
   // Use memoized toggle handler
   const toggleMenu = useCallback(() => {
-    setMenuOpen((prev) => !prev);
+    setMenuOpen((prev) => {
+      const newMenuOpen = !prev;
+      // Use the new state value directly instead of relying on the current state
+      if (newMenuOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+      return newMenuOpen;
+    });
+  }, []);
 
-    // Prevent body scrolling when menu is open
+  // Cleanup scroll lock when component unmounts or when menu should be closed
+  useEffect(() => {
+    return () => {
+      // Always reset body overflow when component unmounts
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  // Ensure scroll is unlocked when menuOpen changes to false
+  useEffect(() => {
     if (!menuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
       document.body.style.overflow = "";
     }
   }, [menuOpen]);
 
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
+    // Force unlock scroll immediately
     document.body.style.overflow = "";
   }, []);
 

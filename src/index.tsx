@@ -9,6 +9,9 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
+// Reset body overflow on app initialization to prevent any lingering scroll lock issues
+document.body.style.overflow = "";
+
 root.render(
   <React.StrictMode>
     <BrowserRouter>
